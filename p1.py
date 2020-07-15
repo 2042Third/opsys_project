@@ -20,9 +20,10 @@ param:
 return: list randoms, a list of random numbers that average to 1000 set lambda = lmda
 '''
 def exprand():
+  global lmda
   randoms = []
   for i in range(1000000):
-    x = - math.log(drand48()) / 0.1
+    x = - math.log(drand48()) / lmda
     if x > 300:
       i -= 1
       continue
@@ -62,6 +63,16 @@ def print_new(process):
     print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
           "ms)", len(process[i].keys())-1, "CPU bursts")
 
+def print_test(process):
+  processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                 "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+  for i in range(len(process)):
+    print("Process", processlist[i], "\nArrival time:", process[i]["arrival"], "ms")
+    print("CPU BURSTS:")
+    for j in range(len(process[i].keys())-1):
+      print("CPU burst time:", process[i][j][0], "ms  I/O burst time:", process[i][j][1], "ms")
+
+
 #handle the ties in the order: CPU burst completion, I/O, new proces
 '''
 requires: a and b are not null
@@ -84,7 +95,7 @@ if __name__ == '__main__':
   '''
   n = int(sys.argv[1])
   seed = int(sys.argv[2])
-  Lambda = float(sys.argv[3])
+  lmda = float(sys.argv[3])
   upperbound = int(sys.argv[4])
   t_cs  = int(sys.argv[5])
   alpha = float(sys.argv[6])
@@ -92,12 +103,16 @@ if __name__ == '__main__':
   rr_add = int(sys.argv[8]
   '''
 
+  # hard coded test variables, remove when using command-line arguments
   seed = 100
   count = 0
+  lmda = 0.1
   sequence = exprand()
   process = processGen(10)
   print_new(process)
-  # this is the actual frame
+  print_test(process)
+  # hard coded test variables, remove when using command-line arguments
+  # fuction calls
   '''
   # FCFS
   process = processGen(n)
