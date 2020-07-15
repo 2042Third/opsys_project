@@ -34,6 +34,7 @@ def handleTies(a , b):
   else:
     return b
 
+
 if __name__ == '__main__':
   # get all the cmd/parameters
 
