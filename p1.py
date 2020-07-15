@@ -28,6 +28,7 @@ def exprand(lmda):
     r = drand48()
     x = - math.log(r)/lmda
     randoms.append(x)
+    sum = sum + x
     if x > 3000:
       i -= 1
       continue
@@ -37,11 +38,13 @@ def exprand(lmda):
       min = x
     if i == 0 or x > max:
       max = x
+
   avg = sum / iteration
 
   print("min:", min)
   print("max:", max)
   print("sum:", sum)
+  print("avg:", avg)
 
 
 
