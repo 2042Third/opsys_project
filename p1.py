@@ -37,9 +37,8 @@ def drand48(seed):
 
 
 if __name__ == '__main__':
-  print("This is OPSYS project")
+  process = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+             "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
   drand48(1000)
-  print("xuchang")
-  print("Hello!")
-  print("test")
+  print("HelloWorld!")
   print(sys.argv)
