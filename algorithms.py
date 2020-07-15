@@ -8,8 +8,11 @@ returns: none
 Note:  This implementation is analogous to RR(data, INFINITY, 0).
         Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
+
+
 def FCFS(data):
     return 0
+
 
 '''
 Simulats Shortest Job First CPU scheduling.
@@ -23,8 +26,11 @@ Note: We use exponential averaging to estimate the next CPU burst time.
         , where tau is default to 10.
                                    
 '''
+
+
 def SJF(data, alpha):
     return 0
+
 
 '''
 Simulats Shortest Remaining Time CPU scheduling.
@@ -35,9 +41,10 @@ returns: none
 Note: We use exponential averaging to estimate the next CPU burst time.
         Following the formula:   tau     =  alpha x t   +  (1-alpha) x tau
                                     i+1              i                    i
-        , where tau is default to 10.
-                                   
+        , where tau is default to 10.                          
 '''
+
+
 def SRT(data, alpha):
     return 0
 
@@ -51,6 +58,7 @@ returns: none
 Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
         If 0 is given for bne, the default is END.
 '''
+
 
 def RR(data, time, bne):
     if bne == 0:
