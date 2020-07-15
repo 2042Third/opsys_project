@@ -1,7 +1,14 @@
 import sys
 
+'''
+param: list data, data = [{arrival: t, cpuburst: t, ioburst: t},{}...]
+effects: none
+returns: none
+Note: Simulates first-come-first-serve modal in CPU scheduling. 
+        Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
+'''
+def FCFS(data):
 
-def FCFS():
     return 0
 
 
