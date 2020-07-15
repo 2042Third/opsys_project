@@ -18,7 +18,7 @@ def drand48():
 def processGen(n):
   processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                  "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-  arrival = int
+
   burst = int (100 * drand48()) + 1
   print(burst)
   return 0
