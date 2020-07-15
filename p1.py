@@ -37,6 +37,14 @@ def processGen(n):
         count += 1
       process[i][j] = (cpu, io)
   return process
+
+def print_new(process):
+  processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                 "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+  for i in range(len(process)):
+    print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
+          "ms)", len(process[i].keys())-1, "CPU bursts")
+
 #handle the ties in the order: CPU burst completion, I/O, new proces
 '''
 requires: a and b are not null
@@ -77,6 +85,6 @@ if __name__ == '__main__':
     if x > 3000:
       i -= 1
     sequence.append(x)
-  print(sequence)
-
-  # processGen(10)
+  # print(sequence)
+  process = processGen(10)
+  print_new(process)
