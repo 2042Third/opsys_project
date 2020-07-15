@@ -18,13 +18,21 @@ def drand48():
 def processGen(n):
   processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                  "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-
-  burst = int (100 * drand48()) + 1
+  burst = int(100 * drand48()) + 1
   print(burst)
   return 0
 #handle the ties in the order: CPU burst completion, I/O, new proces
-def handleTies():
-  return 0
+'''
+requires: a and b are not null
+params: char a , char b; process id's 
+effects: none
+returns: char t, the smaller name character
+'''
+def handleTies(a , b):
+  if(a < b):
+    return a
+  else:
+    return b
 
 if __name__ == '__main__':
   # get all the cmd/parameters
