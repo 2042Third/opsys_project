@@ -1,7 +1,7 @@
 import sys
 
 '''
-param: list data, data = [{arrival: t, cpuburst: t, ioburst: t},{}...]
+param: list data, data = []
 effects: none
 returns: none
 Note: Simulates first-come-first-serve modal in CPU scheduling. 
@@ -22,7 +22,7 @@ def SRT():
 
 
 '''
-param: list data, t, bne, data = [{arrival: t, cpuburst: t, ioburst: t},{}...],
+param: list data, t, bne, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...],
  t = time slice, bne = beginning or end of the sequence
 effects: none
 returns: none
