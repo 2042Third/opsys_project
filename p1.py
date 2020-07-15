@@ -1,5 +1,6 @@
 import sys
 import math
+from math import exp, expm1
 from algorithms import *
 def drand48():
   global seed
@@ -11,6 +12,40 @@ def drand48():
   x = seed >> 16
   return float (x / n)
 
+'''
+Generates random numbers using the uniform to exponential distribution.
+param: 
+return: list randoms, a list of random numbers that average to 1000 set lambda = lmda
+'''
+def exprand(lmda):
+  min = 0
+  max = 0
+  sum = 0
+  iteration = 1000000
+  randoms = []
+  for i in range(iteration):
+
+    r = drand48()
+    x = - math.log(r)/lmda
+    randoms.append(x)
+    sum = sum + x
+    if x > 3000:
+      i -= 1
+      continue
+    if i < 20:
+      print("x is",x)
+    if i == 0 or x < min:
+      min = x
+    if i == 0 or x > max:
+      max = x
+
+  avg = sum / iteration
+
+  print("min:", min)
+  print("max:", max)
+  print("sum:", sum)
+  print("avg:", avg)
+
 
 
 # generate the processes (on page5)
@@ -19,7 +54,7 @@ def drand48():
 def processGen(n):
   # list of process dictionaries
   global sequence
-  global count
+  count = 0
   process = []
   for i in range(n):
     arrival = math.floor(sequence[count])
