@@ -1,10 +1,11 @@
 import sys
 
 '''
-param: list data, data = []
+Simulates first-come-first-serve modal in CPU scheduling.
+param: list data, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...]
 effects: none
 returns: none
-Note: Simulates first-come-first-serve modal in CPU scheduling. 
+Note:  This implementation is analogous to RR(data, INFINITY, 0).
         Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
@@ -22,12 +23,12 @@ def SRT():
 
 
 '''
+Simulates Round-Robin modal in CPU scheduling. 
 param: list data, t, bne, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...],
  t = time slice, bne = beginning or end of the sequence
 effects: none
 returns: none
-Note: Simulates Round-Robin modal in CPU scheduling. 
-        Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
+Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
         If 0 is given for bne, the default is END.
 '''
 
