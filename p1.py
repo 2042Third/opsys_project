@@ -1,2 +1,2 @@
-if "__name__" == "__main__":
-  printf("This is OPSYS project")
+if __name__ == '__main__':
+  print("This is OPSYS project")
