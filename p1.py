@@ -27,7 +27,7 @@ def exprand():
     randoms = []
     for i in range(1000000):
         x = - math.log(drand48()) / lmda
-        if x > 300:
+        if x > 3 / lmda:
             i -= 1
             continue
         randoms.append(x)
