@@ -1,11 +1,12 @@
 import sys
 from algorithms import *
+
 def drand48(seed):
   a = 273673163155
   c = 138
   m = 281474976710656
   seed = (a * seed + c) % m
-  print(seed)
+  #print(seed)
   return seed
 
 
@@ -17,11 +18,10 @@ def processGen(n):
   return 0
 #handle the ties in the order: CPU burst completion, I/O, new proces
 def handleTies():
-
+  return 0
 
 if __name__ == '__main__':
-# get all the cmd/parameters
-'''
+  #get all the cmd/parameters
   n = int(sys.argv[1])
   seed = int(sys.argv[2])
   Lambda = float(sys.argv[3])
@@ -29,8 +29,6 @@ if __name__ == '__main__':
   t_cs  = int(sys.argv[5])
   alpha = float(sys.argv[6])
   t_slice = float(sys.argv[7])
-  rr_add = int(sys.argv[8]
-'''
-
+  rr_add = int(sys.argv[8])
   print("test", drand48(12) % 10)
   print(n)
