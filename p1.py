@@ -27,11 +27,12 @@ def exprand(lmda):
 
     r = drand48()
     x = - math.log(r)/lmda
-    randoms.append(x)
-    sum = sum + x
     if x > 3000:
       i -= 1
       continue
+    randoms.append(x)
+    sum = sum + x
+
     if i < 20:
       print("x is",x)
     if i == 0 or x < min:
