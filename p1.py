@@ -9,6 +9,8 @@ def drand48(seed):
   print(seed)
   return seed
 
+# generate the processes
+def processGen():
 
 
 
@@ -19,4 +21,4 @@ if __name__ == '__main__':
   print("Hello!")
   print("test")
   print(sys.argv)
-  print("test",drand48(12) % 10)
+  print("test", drand48(12) % 10)
