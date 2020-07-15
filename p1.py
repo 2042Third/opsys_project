@@ -1,45 +1,36 @@
 import sys
-
-
+from algorithms import *
 def drand48(seed):
   a = 273673163155
   c = 138
   m = 281474976710656
   seed = (a * seed + c) % m
   print(seed)
-  # return ??? <- find what to return
+  return seed
 
-  # class Rand48(object):
-  #   def __init__(self, seed):
-  #     self.n = seed
-  #
-  #   def seed(self, seed):
-  #     self.n = seed
-  #
-  #   def srand(self, seed):
-  #     self.n = (seed << 16) + 0x330e
-  #
-  #   def next(self):
-  #     self.n = (25214903917 * self.n + 11) & (2 ** 48 - 1)
-  #     return self.n
-  #
-  #   def drand(self):
-  #     return self.next() / 2 ** 48
-  #
-  #   def lrand(self):
-  #     return self.next() >> 17
-  #
-  #   def mrand(self):
-  #     n = self.next() >> 16
-  #     if n & (1 << 31):
-  #       n -= 1 << 32
-  #     return n
+
+
+# generate the processes (on page5)
+# n: the number of process generates (1<=n<=26)
+# using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
+def processGen(n):
+  return 0
+#handle the ties in the order: CPU burst completion, I/O, new proces
+def handleTies():
 
 
 if __name__ == '__main__':
-  print("This is OPSYS project")
-  drand48(1000)
-  print("xuchang")
-  print("Hello!")
-  print("test")
-  print(sys.argv)
+# get all the cmd/parameters
+'''
+  n = int(sys.argv[1])
+  seed = int(sys.argv[2])
+  Lambda = float(sys.argv[3])
+  upperbound = int(sys.argv[4])
+  t_cs  = int(sys.argv[5])
+  alpha = float(sys.argv[6])
+  t_slice = float(sys.argv[7])
+  rr_add = int(sys.argv[8]
+'''
+
+  print("test", drand48(12) % 10)
+  print(n)
