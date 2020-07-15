@@ -16,4 +16,5 @@ if __name__ == '__main__':
   drand48(1000)
   print("xuchang")
   print("Hello!")
+  print("test")
   print(sys.argv)
