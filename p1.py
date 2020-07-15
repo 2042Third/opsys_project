@@ -126,7 +126,7 @@ if __name__ == '__main__':
   print_new(process)
   # this is the actual frame
   '''
-  # pFCFS
+  # FCFS
   process = processGen(n)
   print_new(process)
   print_log(FCFS(process))
