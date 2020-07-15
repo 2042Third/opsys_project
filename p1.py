@@ -1,5 +1,5 @@
 import sys
-
+from algorithms import *
 def drand48(seed):
   a = 273673163155
   c = 138
@@ -10,21 +10,27 @@ def drand48(seed):
 
 
 
-# generate the processes
+# generate the processes (on page5)
 # n: the number of process generates (1<=n<=26)
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
-  return 1
-
+  return 0
+#handle the ties in the order: CPU burst completion, I/O, new proces
+def handleTies():
 
 
 if __name__ == '__main__':
 # get all the cmd/parameters
-#  n = int(sys.argv[1])
-#  seed = int(sys.argv[2])
-#  Lambda = float(sys.argv[3])
-#  upperbound = int(sys.argv[4])
-#  t_cs  = int(sys.argv[5])
-#  alpha = float(sys.argv[6])
+'''
+  n = int(sys.argv[1])
+  seed = int(sys.argv[2])
+  Lambda = float(sys.argv[3])
+  upperbound = int(sys.argv[4])
+  t_cs  = int(sys.argv[5])
+  alpha = float(sys.argv[6])
+  t_slice = float(sys.argv[7])
+  rr_add = int(sys.argv[8]
+'''
 
   print("test", drand48(12) % 10)
+  print(n)
