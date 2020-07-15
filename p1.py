@@ -18,7 +18,9 @@ def drand48():
 def processGen(n):
   processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                  "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-
+  arrival = int
+  burst = int (100 * drand48()) + 1
+  print(burst)
   return 0
 #handle the ties in the order: CPU burst completion, I/O, new proces
 def handleTies():
@@ -28,15 +30,14 @@ if __name__ == '__main__':
   # get all the cmd/parameters
 
   '''
-    n = int(sys.argv[1])
-    seed = int(sys.argv[2])
-    Lambda = float(sys.argv[3])
-    upperbound = int(sys.argv[4])
-    t_cs  = int(sys.argv[5])
-    alpha = float(sys.argv[6])
-    t_slice = float(sys.argv[7])
-   rr_add = int(sys.argv[8]
+  n = int(sys.argv[1])
+  seed = int(sys.argv[2])
+  Lambda = float(sys.argv[3])
+  upperbound = int(sys.argv[4])
+  t_cs  = int(sys.argv[5])
+  alpha = float(sys.argv[6])
+  t_slice = float(sys.argv[7])
+  rr_add = int(sys.argv[8]
   '''
-  seed = 1000
-  for i in range(10):
-    print("test", drand48())
+  seed = 100
+  processGen(10)
