@@ -1,4 +1,5 @@
 import sys
+import math
 from algorithms import *
 def drand48():
   global seed
@@ -16,11 +17,26 @@ def drand48():
 # n: the number of process generates (1<=n<=26)
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
-  processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                 "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-  burst = int(100 * drand48()) + 1
-  print(burst)
-  return 0
+  # list of process dictionaries
+  global sequence
+  count = 0
+  process = []
+  for i in range(n):
+    arrival = math.floor(sequence[count])
+    count += 1
+    process.append({})
+    process[i]["arrival"] = arrival
+    burst = int(100 * drand48()) + 1
+    for j in range(burst):
+      cpu = math.ceil(sequence[count])
+      count += 1
+      if j == burst-1:
+        io = 0
+      else:
+        io = math.ceil(sequence[count])
+        count += 1
+      process[i][j] = (cpu, io)
+  return process
 #handle the ties in the order: CPU burst completion, I/O, new proces
 '''
 requires: a and b are not null
@@ -35,6 +51,9 @@ def handleTies(a , b):
     return b
 
 if __name__ == '__main__':
+  # list of processes
+  processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                 "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
   # get all the cmd/parameters
 
   '''
@@ -47,5 +66,17 @@ if __name__ == '__main__':
   t_slice = float(sys.argv[7])
   rr_add = int(sys.argv[8]
   '''
+
   seed = 100
-  processGen(10)
+  sequence = []
+  min = 0
+  max = 0
+  sum = 0
+  for i in range(1000):
+    x = -math.log(drand48()) / 0.001
+    if x > 3000:
+      i -= 1
+    sequence.append(x)
+  print(sequence)
+
+  # processGen(10)
