@@ -36,18 +36,14 @@ def handleTies(a , b):
 
 
 if __name__ == '__main__':
-  # get all the cmd/parameters
-
-  '''
-    n = int(sys.argv[1])
-    seed = int(sys.argv[2])
-    Lambda = float(sys.argv[3])
-    upperbound = int(sys.argv[4])
-    t_cs  = int(sys.argv[5])
-    alpha = float(sys.argv[6])
-    t_slice = float(sys.argv[7])
-   rr_add = int(sys.argv[8]
-  '''
-  seed = 1000
-  for i in range(10):
-    print("test", drand48())
+  #get all the cmd/parameters
+  # n = int(sys.argv[1])
+  # seed = int(sys.argv[2])
+  # Lambda = float(sys.argv[3])
+  # upperbound = int(sys.argv[4])
+  # t_cs  = int(sys.argv[5])
+  # alpha = float(sys.argv[6])
+  # t_slice = float(sys.argv[7])
+  # rr_add = int(sys.argv[8])
+  print("test", drand48(12) % 10)
+  print()
