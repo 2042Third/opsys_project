@@ -23,11 +23,11 @@ return: list randoms, a list of random numbers that average to 1000 set lambda =
 
 
 def exprand():
-    global lmda
+    global lmda, upperbound
     randoms = []
     for i in range(1000000):
         x = - math.log(drand48()) / lmda
-        if x > 3 / lmda:
+        if x > upperbound:
             i -= 1
             continue
         randoms.append(x)
@@ -60,12 +60,27 @@ def processGen(n):
     return process
 
 
+'''
+Print out the initial process arrival time and CPU bursts
+param: 
+process: the process list of dictionaries
+'''
+
+
 def print_new(process):
     processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     for i in range(len(process)):
         print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
               "ms)", len(process[i].keys()) - 1, "CPU bursts")
+
+
+'''
+For test only
+Print out the detail CPU bursts and I/O bursts
+param: 
+process: the process list of dictionaries
+'''
 
 
 def print_test(process):
@@ -114,13 +129,14 @@ if __name__ == '__main__':
     # hard coded test variables, remove when using command-line arguments
     seed = 100
     count = 0
+    upperbound = 30
     lmda = 0.1
     sequence = exprand()
     process = processGen(10)
     print_new(process)
     print_test(process)
     # hard coded test variables, remove when using command-line arguments
-    # fuction calls
+    # function calls
     '''
     # FCFS
     process = processGen(n)
