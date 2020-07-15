@@ -19,7 +19,7 @@ def drand48():
 def processGen(n):
   # list of process dictionaries
   global sequence
-  count = 0
+  global count
   process = []
   for i in range(n):
     arrival = math.floor(sequence[count])
@@ -76,6 +76,7 @@ if __name__ == '__main__':
   '''
 
   seed = 100
+  count = 0
   sequence = []
   min = 0
   max = 0
@@ -88,3 +89,20 @@ if __name__ == '__main__':
   # print(sequence)
   process = processGen(10)
   print_new(process)
+  # this is the actual frame
+  '''
+  # pFCFS
+  process = processGen(n)
+  print_new(process)
+  print_log(FCFS(process))
+  process = processGen(n)
+  print_new(process)
+  print_log(SJF(process))
+  process = processGen(n)
+  print_new(process)
+  print_log(SRT(process))
+  process = processGen(n)
+  print_new(process)
+  print_log(RR(process, t, bne))
+  '''
+
