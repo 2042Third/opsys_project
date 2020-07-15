@@ -20,11 +20,11 @@ def processGen(n):
 
 if __name__ == '__main__':
 # get all the cmd/parameters
-  n = int(sys.argv[1])
-  seed = int(sys.argv[2])
-  Lambda = float(sys.argv[3])
-  upperbound = int(sys.argv[4])
-  t_cs  = int(sys.argv[5])
-  alpha = float(sys.argv[6])
+#  n = int(sys.argv[1])
+#  seed = int(sys.argv[2])
+#  Lambda = float(sys.argv[3])
+#  upperbound = int(sys.argv[4])
+#  t_cs  = int(sys.argv[5])
+#  alpha = float(sys.argv[6])
 
   print("test", drand48(12) % 10)
