@@ -1,5 +1,7 @@
 import sys
-
+global processlist
+processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 '''
 Simulates first-come-first-serve modal in CPU scheduling.
 param: list data, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...]
@@ -11,7 +13,37 @@ Note:  This implementation is analogous to RR(data, INFINITY, 0).
 
 
 def FCFS(data):
-    return 0
+    cpubtT = 0      # total time
+    waittT = 0
+    trnadT = 0
+    ctsT   = 0
+    prmptT = 0
+    ReadyQueue = []
+    arrtime = []
+    dict = []
+    n = len(data)
+    # put process into ready queue
+    for i in range(n):
+        ReadyQueue.append(processlist[i])
+    for i in range(n):
+        arrtime.append(data[i]["arrival"])
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if arrtime[j] > arrtime[j + 1]:
+                arrtime[j], arrtime[j + 1] = arrtime[j + 1], arrtime[j]
+                ReadyQueue[j], ReadyQueue[j + 1] = ReadyQueue[j + 1], ReadyQueue[j]
+    burstarr = []
+    for i in range(n):
+        burstarr.append(len(data[i])-1)  # burstarr = [ num of burst of A, num of burst of B,...]
+    for i in range(n):
+        dict.append({})
+        time = 1
+        dict[i]["time"] = time
+
+
+
+
+    return arrtime,ReadyQueue,burstarr
 
 
 '''
@@ -70,3 +102,4 @@ def RR(data, time, bne):
             bne = True
 
     return 0
+
