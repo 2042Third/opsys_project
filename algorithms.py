@@ -38,7 +38,8 @@ def FCFS(data):
     for i in range(n):
         dict.append({})
         time = 1
-        dict[i]["time"] = time
+        dict[i]["time"] = time # dict[time: time, 0:[process id], 1:[status], 2:[cpu using time],
+                               #     3:[burst num], 4:[Readyqueue] ]
 
 
 
