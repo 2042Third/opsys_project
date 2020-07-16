@@ -1,4 +1,5 @@
 import sys
+from queue import PriorityQueue
 global processlist
 processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -79,6 +80,49 @@ Note: We use exponential averaging to estimate the next CPU burst time.
 
 
 def SRT(data, alpha):
+    global lmda
+
+    arrivq = PriorityQueue()
+    readyq = PriorityQueue()
+    stat = []
+    tau = 1/lmda
+    for i in range(len(data)):
+        stat.append((0, data[i]["arrival"], -1))
+        arrivq.put((data[i]["arrival"], i))
+    tmln = 0
+    while stat.max()[0] != -1:
+        for i in range(len(stat)):
+            stat[i][1] = stat[i][1]-1
+            if stat[i][0] == 3:
+                if stat[i][1] > readyq[0][0]:
+                    nextel = readyq.get()
+                    stat[nextel[1]][0] = 3
+                    stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
+                    stat[i][0] = 2
+                    readyq.put((stat[i][1],i))
+            if stat[i][1] == 0:#something's happening
+
+                if stat[i][0] == 0:#arrived and start io
+                    stat[i][2] = stat[i][2] + 1
+                    iot = data[i][stat[i][2]][1]
+                    stat[i][0] = 1
+                    stat[i][1] = iot
+                elif stat[i][0] == 2:#io'ed to ready queue
+                    tau = tau*alpha + (1-alpha)*tau
+                    readyq.put(tau,i)
+                    stat[i][2] = stat[i][2] + 1
+                    stat[i][0] = 2
+                elif stat[i][0] == 3:#finished running, to next io or finished
+                    if data[i][1] == 0:#finished
+                        stat[i][0] = -1
+                    else: #to next burst
+                        stat[i][0] = 1
+                        stat[i][2] = stat[i][2] + 1
+                        nextel = readyq.get()
+                        stat[nextel[1]][0] = 3
+                        stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
+
+
     return 0
 
 
