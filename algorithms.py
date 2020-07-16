@@ -81,14 +81,16 @@ Note: We use exponential averaging to estimate the next CPU burst time.
 
 def SRT(data, alpha):
     global lmda
-
+    global switcht
     arrivq = PriorityQueue()
     readyq = PriorityQueue()
     stat = []
     tau = 1/lmda
+    t = 10
     for i in range(len(data)):
         stat.append((0, data[i]["arrival"], -1))
-        arrivq.put((data[i]["arrival"], i))
+        #arrivq.put((data[i]["arrival"], i))
+
     tmln = 0
     while stat.max()[0] != -1:
         for i in range(len(stat)):
@@ -102,26 +104,36 @@ def SRT(data, alpha):
                     readyq.put((stat[i][1],i))
             if stat[i][1] == 0:#something's happening
 
-                if stat[i][0] == 0:#arrived and start io
+                if stat[i][0] == 0:#arrived and queuing
+                    #stat[i][2] = stat[i][2] + 1
+                    #cput = data[i][stat[i][2]][0]
+                    tau = t * alpha + (1 - alpha) * tau
+                    stat[i][0] = 2
                     stat[i][2] = stat[i][2] + 1
-                    iot = data[i][stat[i][2]][1]
-                    stat[i][0] = 1
-                    stat[i][1] = iot
-                elif stat[i][0] == 2:#io'ed to ready queue
-                    tau = tau*alpha + (1-alpha)*tau
-                    readyq.put(tau,i)
+                    readyq.put((tau,i))
+
+                elif stat[i][0] == 1:#io'ed to ready queue
+                    tau = t*alpha + (1-alpha)*tau
+                    readyq.put((tau,i))
                     stat[i][2] = stat[i][2] + 1
                     stat[i][0] = 2
-                elif stat[i][0] == 3:#finished running, to next io or finished
-                    if data[i][1] == 0:#finished
-                        stat[i][0] = -1
-                    else: #to next burst
-                        stat[i][0] = 1
-                        stat[i][2] = stat[i][2] + 1
-                        nextel = readyq.get()
-                        stat[nextel[1]][0] = 3
-                        stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
+                elif stat[i][0] == 3:#finished running, to next
+                    if data[i][stat[i][2]][1] == 0:#finished
 
+                        stat[i][0] = -1
+                        stat[i][1] = tmln - data[i]["arrival"]
+                    else: #to next
+                        stat[i][0] = 1
+                        stat[i][2] = stat[i][2]
+                        nextel = readyq.get()
+                        stat[nextel[1]][0] = 4
+                        stat[nextel[1]][1] = switcht
+                        # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
+                else:#switched, start cpu
+                    stat[i][0] = 3
+                    stat[i][1] = data[i][stat[i][2]][0]
+
+        tmln = tmln+1
 
     return 0
 
