@@ -87,6 +87,9 @@ def SRT(data, alpha):
     stat = []
     tau = 1/lmda
     t = 10
+    swchto = 'n'
+    swchnum = -1
+
     for i in range(len(data)):
         stat.append((0, data[i]["arrival"], -1))
         #arrivq.put((data[i]["arrival"], i))
@@ -97,11 +100,11 @@ def SRT(data, alpha):
             stat[i][1] = stat[i][1]-1
             if stat[i][0] == 3:
                 if stat[i][1] > readyq[0][0]:
-                    nextel = readyq.get()
-                    stat[nextel[1]][0] = 3
-                    stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
-                    stat[i][0] = 2
-                    readyq.put((stat[i][1],i))
+                    swchnum = readyq[0][1]
+                    swchto = 'q'
+                    stat[i][0] = 4
+                    stat[i][1] = switcht
+
             if stat[i][1] == 0:#something's happening
 
                 if stat[i][0] == 0:#arrived and queuing
@@ -117,6 +120,7 @@ def SRT(data, alpha):
                     readyq.put((tau,i))
                     stat[i][2] = stat[i][2] + 1
                     stat[i][0] = 2
+                    stat[i][1] = -1
                 elif stat[i][0] == 3:#finished running, to next
                     if data[i][stat[i][2]][1] == 0:#finished
 
@@ -128,10 +132,21 @@ def SRT(data, alpha):
                         nextel = readyq.get()
                         stat[nextel[1]][0] = 4
                         stat[nextel[1]][1] = switcht
+                        swchto = 'io'
                         # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
                 else:#switched, start cpu
-                    stat[i][0] = 3
-                    stat[i][1] = data[i][stat[i][2]][0]
+                    if swchnum == i:#from switch to cpu
+                        nextel = readyq.get()
+                        stat[i][0] = 3
+                        stat[i][1] = data[i][stat[i][2]][0]
+                    else:#from switch to queue or io
+                        if(swchto == 'io'):
+                            stat[i][0] = 1
+                            stat[i][1] = data[i][stat[i][2]][1]
+                        else:
+                            stat[i][0] = 2
+                            stat[i][1] = -1
+
 
         tmln = tmln+1
 
