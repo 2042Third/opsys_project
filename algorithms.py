@@ -44,7 +44,7 @@ def FCFS(data):
 
 
 
-    return arrtime,ReadyQueue,burstarr
+    return arrtime,ReadyQueue,burstarr # for test ; should be: return dict
 
 
 '''
