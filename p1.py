@@ -142,8 +142,8 @@ if __name__ == '__main__':
     print_new(process)
 
     bne = 0
-    FCFS(process, t_cs)
-    RR(process, t_cs, t_slice, bne)
+    #FCFS(process, t_cs)
+    #RR(process, t_cs, t_slice, bne)
 
     # print_test(process)
     #FCFS(process, t_cs)
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     ##FCFS(process, t_cs)
     #process = processGen(count)
 
-    #SRT(process, alpha, lmda, switcht, processlist)
+    SRT(process, alpha, lmda, switcht, processlist)
     # print(process)
     # print("=======test=======")
     # print(process[0]["arrival"])

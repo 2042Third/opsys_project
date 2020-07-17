@@ -161,7 +161,7 @@ Note: We use exponential averaging to estimate the next CPU burst time.
 
 
 def SRT(data, alpha,lmda,switcht, processlist):
-
+    remain = []
     arrivq = PriorityQueue()
     readyq = PriorityQueue()
     stat = []
@@ -173,6 +173,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
     finished = 0
     for i in range(len(data)):
         stat.append((0, data[i]["arrival"], -1, tau))
+        remain.append(-1)
         print('Process',processlist[i],"[NEW] (arrival time",stat[i][1],"ms)",len(data[i])-1,'CPU bursts' )
         #arrivq.put((data[i]["arrival"], i))
         #print(stat[i])
@@ -185,7 +186,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
         # print(stat)
         for i in range(len(data)):
 
-            # print(stat[i], i)
+            print(stat[i], i)
             if stat[i][0] == -1:
                 continue
             # tp = stat[i]
@@ -201,10 +202,16 @@ def SRT(data, alpha,lmda,switcht, processlist):
             #         stat[i] = (4, switcht,tp[2],tp[3])
             #         stat[swchnum] = (4, switcht,stat[swchnum][2],stat[swchnum][3])
 
+            if stat[0] != 4 and running == -2 :
+                if len(readyq.queue) != 0:
+                    print('very not ')
+                    swchnum = i
+                    tp = stat[i]
+                    stat[i] = (4, switcht, tp[2], tp[3])
 
 
             if stat[i][1] == 0:#something's happening
-
+                print("not rifhgt")
                 if stat[i][0] == 0:#arrived and queuing
                     #stat[i][2] = stat[i][2] + 1
                     #cput = data[i][stat[i][2]][0]
@@ -223,11 +230,13 @@ def SRT(data, alpha,lmda,switcht, processlist):
                     elif (stat[running][1] > stat[i][3]):
                         swchto = 'q'
                         swchnum = i
+
                         stat[i] = (4, switcht, tp[2] + 1, tp[3])
                         tp = stat[running]
+                        remain[running] = tp[1]
                         stat[running] = (4, switcht, tp[2], tp[3])
                         running = i
-                    elif (stat[running][1] > stat[i][3]):
+                    elif (stat[running][1] == stat[i][3]):
                         pr = handleTies(running,i)
                         if i != pr:
                             pn = i
@@ -241,6 +250,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                             swchto = 'q'
                             swchnum = pr
                             tp = stat[pr]
+                            remain[running] = stat[running][1]
                             stat[pr] = (4, switcht,tp[2]+1,tp[3])
                             tp = stat[running]
                             stat[running] = (4,switcht,tp[2],tp[3])
@@ -254,14 +264,19 @@ def SRT(data, alpha,lmda,switcht, processlist):
                 elif stat[i][0] == 1:#io'ed to ready queue
                     tp = stat[i]
                     # print('real trying to switch')
+                    print(stat[running][1] , stat[i][3])
                     if (stat[running][1] > stat[i][3]):
+                        print(11)
                         swchto = 'q'
                         swchnum = i
+
                         stat[i] = (4, switcht, tp[2] + 1, tp[3])
                         tp = stat[running]
+                        remain[running] = tp[1]
                         stat[running] = (4, switcht, tp[2], tp[3])
                         running = i
                     elif (stat[running][1] == stat[i][3]):
+                        print(13)
                         pr = handleTies(running,i)
                         if i != pr:
                             pn = i
@@ -276,9 +291,11 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         tp = stat[pr]
                         stat[pr] = (4, switcht,tp[2]+1,tp[3])
                         tp = stat[running]
+                        remain[running] = tp[1]
                         stat[running] = (4,switcht,tp[2],tp[3])
                         running = pr
                     else:
+                        print(99)
                         stat[i] = (2,-1,tp[2]+1,tp[3])
                         readyq.put((stat[i][3], i))
 
@@ -291,13 +308,20 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         print('1')
                         # if finished == len(stat) - 1:
                         tp = stat[i]
+                        swchto = 'io'
+                        running = -2
                         stat[i] = (4, switcht, tp[2], tp[3])
-                        continue
+                        if data[i][stat[i][2]][1] == 0:
+                            print('1')
+                            tp = stat[i]
+                            stat[i] = (-1, tmln - data[i]["arrival"], tp[2], tp[3])
+                            finished = finished + 1
+                        #continue
                     # else:
                     #     continue
 
 
-                    if data[i][stat[i][2]][1] == 0:#finished
+                    elif data[i][stat[i][2]][1] == 0:#finished
                         # print('2',finished)
                         if(finished == 10):
                             return
@@ -346,7 +370,10 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         #nextel = readyq.get()
                         running = i
                         tp = stat[i]
-                        stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
+                        if(remain[i] == -1):
+                            stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
+                        else:
+                            stat[i] = (3, remain[i], tp[2], tp[3])
                         running = i
                         print('time {}ms: Process {} started using the CPU for {}ms burst'.format( tmln, processlist[i], stat[i][1]),end='')
                         print_q(i, tmln, readyq)
@@ -361,10 +388,12 @@ def SRT(data, alpha,lmda,switcht, processlist):
                             stat[i] = (2, -1, tp[2], tp[3])
                             readyq.put((tp[3],i))
             tp = stat[i]
+            print(tp[1])
             stat[i] = (tp[0], tp[1] - 1, tp[2], tp[3])
+            print(stat[i],"waht")
 
-        # if(tmln > 30000):
-        #     break
+        if(tmln > 3000):
+            break
 
 
     return 0
