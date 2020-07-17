@@ -137,11 +137,12 @@ if __name__ == '__main__':
     lmda = 0.01
     alpha = 0.5
     sequence = exprand()
-    process = processGen(2)
+    process = processGen(10)
     print_new(process)
     # print_test(process)
     FCFS(process, t_cs)
-    process = processGen(count)
+    #process = processGen(count)
+    print()
     SRT(process,alpha,lmda,switcht, processlist)
     # print(process)
     # print("=======test=======")
