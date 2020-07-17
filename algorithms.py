@@ -191,7 +191,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                 print("trying to switch {} > ?".format(stat[i][1]))
                 print(readyq.queue)
                 if stat[i][1] > readyq.queue[0][0]:
-                    swchnum = readyq[0][1]
+                    swchnum = readyq.queue[0][1]
                     swchto = 'q'
                     tp = stat[i]
                     stat[i] = (4, switcht,tp[2],tp[3])
@@ -206,7 +206,6 @@ def SRT(data, alpha,lmda,switcht, processlist):
                     #cput = data[i][stat[i][2]][0]
                     tp = stat[i]
                     stat[i] = (2,tp[1],tp[2]+1,tp[3])
-
                     readyq.put((tau, i))
                     print('time {}ms: Process {} (tau {}ms) arrived; added to ready queue '.format(tmln, processlist[i], stat[i][3]),
                           end='')
@@ -221,9 +220,8 @@ def SRT(data, alpha,lmda,switcht, processlist):
 
                 elif stat[i][0] == 1:#io'ed to ready queue
                     tp = stat[i]
-
-                    readyq.put((stat[i][3],i))
                     stat[i] = (2,-1,tp[2]+1,tp[3])
+                    readyq.put((stat[i][3], i))
 
                 elif stat[i][0] == 3:#finished running, to next
                     #stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
