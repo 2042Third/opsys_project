@@ -138,7 +138,7 @@ if __name__ == '__main__':
     alpha = 0.5
     t_slice = 20
     sequence = exprand()
-    process = processGen(1)
+    process = processGen(2)
     print_new(process)
 
     bne = 0
