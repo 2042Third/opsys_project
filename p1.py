@@ -128,16 +128,15 @@ if __name__ == '__main__':
 
     # hard coded test variables, remove when using command-line arguments
     seed = 2
+    t_cs = 4
     count = 0
     upperbound = 30
     lmda = 0.01
     sequence = exprand()
     process = processGen(2)
-    print(process)
-    print("=======test=======")
-    print(process[0]["arrival"])
-    print(FCFS(process))
-    print(len(process[0]))
+    print_new(process)
+    # print_test(process)
+    FCFS(process, t_cs)
 
 
     # hard coded test variables, remove when using command-line arguments
