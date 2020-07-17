@@ -139,6 +139,7 @@ if __name__ == '__main__':
     sequence = exprand()
     process = processGen(1)
     print_new(process)
+
     bne = 0
     print(FCFS(process, t_cs))
     print(RR(process, t_cs, bne))
