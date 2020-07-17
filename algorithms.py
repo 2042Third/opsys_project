@@ -66,6 +66,12 @@ def SJF(data, alpha):
     return 0
 
 
+
+def print_q(i,tmln, readyq):
+    print("[Q")
+    for z in range(len(readyq)):
+        print(" {}".format(readyq[i][1]), end="")
+    print()
 '''
 Simulats Shortest Remaining Time CPU scheduling.
 param: data, alpha, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...]
@@ -92,7 +98,7 @@ def SRT(data, alpha):
     swchnum = -1
 
     for i in range(len(data)):
-        stat.append((0, data[i]["arrival"], -1))
+        stat.append((0, data[i]["arrival"], -1, tau))
         print('Process',processlist[i],"[NEW] (arrival time",stat[i][1],"ms)",len(data[i])-1,'CPU bursts' )
         #arrivq.put((data[i]["arrival"], i))
 
@@ -114,41 +120,63 @@ def SRT(data, alpha):
                 if stat[i][0] == 0:#arrived and queuing
                     #stat[i][2] = stat[i][2] + 1
                     #cput = data[i][stat[i][2]][0]
-
                     stat[i][0] = 2
                     stat[i][2] = stat[i][2] + 1
-                    readyq.put((tau,i))
+                    readyq.put((tau, i))
+                    print('time {}ms: Process {} (tau {}ms) arrived; added to ready queue '.format(tmln, processlist[i], stat[i][4]),
+                          end='')
+                    print_q(i,tmln,readyq)
+
 
                 elif stat[i][0] == 1:#io'ed to ready queue
 
-                    readyq.put((tau,i))
+                    readyq.put((stat[i][4],i))
                     stat[i][2] = stat[i][2] + 1
                     stat[i][0] = 2
                     stat[i][1] = -1
                 elif stat[i][0] == 3:#finished running, to next
+                    stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
                     if data[i][stat[i][2]][1] == 0:#finished
 
                         stat[i][0] = -1
                         stat[i][1] = tmln - data[i]["arrival"]
-                        tau = t * alpha + (1 - alpha) * tau
-                        print('time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln,processlist[i],tau),end='')
-                        print(' {} bursts to go [Q',end='')
-                        for z in range(len(readyq)):
-                            print(" {}".format(readyq[i][1]),end="")
-                        print()
+
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
+                            end='')
+                        print(' {} bursts to go ', end='')
+                        print_q(i, tmln, readyq)
+
+
                     else: #to next
+
                         stat[i][0] = 1
                         stat[i][2] = stat[i][2]
                         nextel = readyq.get()
                         stat[nextel[1]][0] = 4
                         stat[nextel[1]][1] = switcht
                         swchto = 'io'
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
+                            end='')
+                        print(' {} bursts to go ', end='')
+                        print_q(i,tmln,readyq)
+                        print('time {}ms: Recalculated tau = {}ms for process {} '.format(tmln,processlist[i]))
+                        print_q(i, tmln, readyq)
+                        print(
+                            'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
+                            end='')
+                        print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1]+tmln),end='')
+                        print_q(i, tmln, readyq)
+
                         # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
                 else:#switched, start cpu
                     if swchnum == i:#from switch to cpu
                         nextel = readyq.get()
                         stat[i][0] = 3
                         stat[i][1] = data[i][stat[i][2]][0]
+                        print('time {}ms: Process {} started using the CPU for {}ms burst'.format( stat[i][1]),end='')
+                        print_q(i, tmln, readyq)
                     else:#from switch to queue or io
                         if(swchto == 'io'):
                             stat[i][0] = 1
