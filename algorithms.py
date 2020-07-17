@@ -299,7 +299,7 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
 
-def RR(data, time, bne):
+def RR(data, tcs, bne):
     if bne == 0:
         bne = True
     else:
@@ -307,6 +307,108 @@ def RR(data, time, bne):
             bne = False
         else:
             bne = True
-
+    print("time 0ms: Simulator started for RR [Q <empty>]")
+    cpubtT = 0  # total time
+    waittT = 0
+    trnadT = 0
+    ctsT = 0
+    prmpt = 0
+    queue = []
+    nextaction = []
+    burstleft = []
+    burstdone = []
+    using = 0
+    first_process = 1
+    for i in range(len(data)):
+        nextaction.append(("arrive", data[i]["arrival"]))
+        burstleft.append(len(data[i]) - 2)
+        burstdone.append(0)
+    finish = 0
+    time = 0
+    while finish < len(data):
+        actions = []
+        for i in range(len(data)):
+            if time == nextaction[i][1]:
+                actions.append((i, nextaction[i]))
+        if len(actions) > 1:
+            prmpt += 1
+        for i in range(len(actions)):
+            if actions[i][1][0] == "arrive":
+                queue.append(processlist[actions[i][0]])
+                if time <= 999:
+                    print("time {}ms: Process {} arrived; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+            elif actions[i][1][0] == "cpu":
+                current = actions[i][0]
+                queue.pop(0)
+                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                if time <= 999:
+                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
+                          .format(time, processlist[current], data[current][burstdone[current]][0]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+            elif actions[i][1][0] == "io":
+                current = actions[i][0]
+                burstleft[current] -= 1
+                burstdone[current] += 1
+                if burstleft[current] == 0:
+                    print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    finish += 1
+                else:
+                    nextaction[current] = ("ready", time + data[current][burstdone[current]][1])
+                    if time <= 999:
+                        print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
+                              .format(time, processlist[current], burstleft[actions[i][0]]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                        print("time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms [Q "
+                              .format(time, processlist[current], nextaction[current][1]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                using = 0
+            elif actions[i][1][0] == "ready":
+                queue.append(processlist[actions[i][0]])
+                if time <= 999:
+                    print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+        if len(queue) > 0 and using == 0:
+            current = processlist.index(queue[0])
+            using = 1
+            if first_process == 1:
+                nextaction[current] = ("cpu", time + tcs/2 )
+                first_process = 0
+            else:
+                nextaction[current] = ("cpu", time + tcs)
+        time += 1
+    print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
     return 0
+
 
