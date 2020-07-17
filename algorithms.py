@@ -1,4 +1,5 @@
 import sys
+from queue import PriorityQueue
 global processlist
 processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -137,6 +138,12 @@ def SJF(data, alpha):
     return 0
 
 
+
+def print_q(i,tmln, readyq):
+    print("[Q",end='')
+    for z in range(len(readyq.queue)):
+        print(" {}".format(processlist[readyq.queue[z][1]]), end="")
+    print(']')
 '''
 Simulats Shortest Remaining Time CPU scheduling.
 param: data, alpha, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...]
@@ -150,7 +157,133 @@ Note: We use exponential averaging to estimate the next CPU burst time.
 '''
 
 
-def SRT(data, alpha):
+def SRT(data, alpha,lmda,switcht, processlist):
+
+    arrivq = PriorityQueue()
+    readyq = PriorityQueue()
+    stat = []
+    tau = 1/lmda
+    t = 10
+    swchto = 'n'
+    swchnum = -1
+
+    for i in range(len(data)):
+        stat.append((0, data[i]["arrival"], -1, tau))
+        print('Process',processlist[i],"[NEW] (arrival time",stat[i][1],"ms)",len(data[i])-1,'CPU bursts' )
+        #arrivq.put((data[i]["arrival"], i))
+        #print(stat[i])
+
+    tmln = 0
+    print('time 0ms: Simulator started for SRT [Q <empty>]')
+    while max(stat)[0] != -1:
+        tmln = tmln + 1
+        #print(tmln,"new")
+        #print(stat)
+        for i in range(len(data)):
+
+
+
+            tp = stat[i]
+            stat[i] = (tp[0],tp[1]-1,tp[2],tp[3])
+            #print(stat[i], i)
+            if stat[i][0] == 3:
+                if stat[i][1] > readyq.queue[0][0]:
+                    swchnum = readyq[0][1]
+                    swchto = 'q'
+                    tp = stat[i]
+                    stat[i] = (4, switcht,tp[2],tp[3])
+
+            if stat[i][1] < -1:
+                continue
+
+            if stat[i][1] == 0:#something's happening
+
+                if stat[i][0] == 0:#arrived and queuing
+                    #stat[i][2] = stat[i][2] + 1
+                    #cput = data[i][stat[i][2]][0]
+                    tp = stat[i]
+                    stat[i] = (2,tp[1],tp[2]+1,tp[3])
+
+                    readyq.put((tau, i))
+                    print('time {}ms: Process {} (tau {}ms) arrived; added to ready queue '.format(tmln, processlist[i], stat[i][3]),
+                          end='')
+                    print_q(i,tmln,readyq)
+                    if swchnum == -1:#first CPU use
+                        tp = stat[i]
+                        readyq.get()
+                        swchnum = i
+
+                        stat[i] = (4,switcht,tp[2], tp[3])
+
+
+                elif stat[i][0] == 1:#io'ed to ready queue
+                    tp = stat[i]
+
+                    readyq.put((stat[i][3],i))
+                    stat[i] = (2,-1,tp[2]+1,tp[3])
+
+                elif stat[i][0] == 3:#finished running, to next
+                    #stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
+                    tptau = t * alpha + (1 - alpha) * stat[i][3]
+                    if data[i][stat[i][2]][1] == 0:#finished
+                        tp = stat[i]
+                        stat[i] = (-1,tmln - data[i]["arrival"], tp[2],tp[3])
+
+
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
+                            end='')
+                        print(' {} bursts to go ', end='')
+                        print_q(i, tmln, readyq)
+
+
+                    else: #to next
+                        tp = stat[i]
+                        stat[i] = (1, tp[1], tp[2],tp[3])
+
+                        nextel = readyq.get()
+                        tp = stat[nextel[1]]
+                        stat[nextel[1]] = (4, switcht,tp[2],tp[3])
+
+                        swchto = 'io'
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
+                            end='')
+                        print(' {} bursts to go ', end='')
+                        print_q(i,tmln,readyq)
+                        print('time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau,processlist[i],),end='')
+                        print_q(i, tmln, readyq)
+                        print(
+                            'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
+                            end='')
+                        print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1]+tmln),end='')
+                        print_q(i, tmln, readyq)
+
+                        # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
+                else:#switched, start cpu
+                    print("switch triggered")
+                    if swchnum == i:#from switch to cpu
+                        nextel = readyq.get()
+                        tp = stat[i]
+                        stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
+
+                        print('time {}ms: Process {} started using the CPU for {}ms burst'.format( stat[i][1], processlist[i], stat[i][1]),end='')
+                        print_q(i, tmln, readyq)
+                    else:#from switch to queue or io
+                        #print(i,"what is happening")
+                        if(swchto == 'io'):
+                            tp = stat[i]
+                            stat[i] = (1, data[i][stat[i][2]][1], tp[2], tp[3])
+
+                        else:
+                            tp = stat[i]
+                            stat[i] = (2, -1, tp[2], tp[3])
+
+
+        if(tmln > 1000):
+            break
+
+
     return 0
 
 
@@ -165,7 +298,7 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
 
-def RR(data, time, bne):
+def RR(data, t_slice, bne,tcs):
     if bne == 0:
         bne = True
     else:
@@ -173,6 +306,157 @@ def RR(data, time, bne):
             bne = False
         else:
             bne = True
+    print("time 0ms: Simulator started for RR [Q <empty>]")
+    cpubtT = 0  # total time
+    waittT = 0
+    trnadT = 0
+    ctsT = 0
+    prmpt = 0
+    queue = []
+    nextaction = []
+    burstleft = []
+    burstdone = []
+    using = 0
+    sign = 0
+    first_process = 1
+    for i in range(len(data)):
+        nextaction.append(("arrive", data[i]["arrival"]))
+        burstleft.append(len(data[i]) - 2)
+        burstdone.append(0)
+    finish = 0
+    time = 0
+    while finish < len(data):
+        actions = []
+        for i in range(len(data)):
+            if time == nextaction[i][1]:
+                actions.append((i, nextaction[i]))
+        if len(actions) > 1:
+            prmpt += 1
+        for i in range(len(actions)):
+            if actions[i][1][0] == "arrive":
+                queue.append(processlist[actions[i][0]])
+                if time <= 999:
+                    print("time {}ms: Process {} arrived; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+            elif actions[i][1][0] == "cpu":
+                current = actions[i][0]
+                if queue != []:
+                    queue.pop(0)
+                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                if time <= 999:
+                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
+                          .format(time, processlist[current], data[current][burstdone[current]][0]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
+                        nextaction[actions[i][0]] = ("expire", time + t_slice)
+                        sign = 0
 
+            elif actions[i][1][0] == "cpupmt":
+                current = actions[i][0]
+
+                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                if time <= 999:
+                    cu = processlist.index(queue[0])
+                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
+                          .format(time, queue[0], data[cu][0][1]), end="")
+                    queue.pop(0)
+                    queue.insert(0,processlist[actions[i-1][0]])
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
+                        nextaction[actions[i][0]] = ("expire", time + t_slice)
+
+
+            elif actions[i][1][0] == "io":
+                current = actions[i][0]
+                burstleft[current] -= 1
+                burstdone[current] += 1
+                if burstleft[current] == 0:
+                    print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    finish += 1
+                else:
+                    nextaction[current] = ("ready", time + data[current][burstdone[current]][1])
+                    if time <= 999:
+                        print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
+                              .format(time, processlist[current], burstleft[actions[i][0]]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                        print("time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms [Q "
+                              .format(time, processlist[current], nextaction[current][1]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                using = 0
+            elif actions[i][1][0] == "ready":
+                queue.append(processlist[actions[i][0]])
+                if time <= 999:
+                    print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+
+            # time slice expire
+            elif actions[i][1][0] == "expire":
+
+                    tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
+
+                    print("time {}ms: Time slice expired; process {} preempted with {} to go [Q {}"
+                          .format(time,processlist[actions[i][0]], tleft, queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+
+                    nextaction[actions[i][0]] = ("cpupmt", time + tcs)
+
+                    #if tleft > t_slice:
+                    #   nextaction[actions[i][0]] = ("expire", time + t_slice)
+                    #    sign = 1
+
+
+
+        if len(queue) > 0 and using == 0:
+            current = processlist.index(queue[0])
+            using = 1
+            if first_process == 1:
+                nextaction[current] = ("cpu", time + tcs/2)
+                first_process = 0
+            else:
+                nextaction[current] = ("cpu", time + tcs)
+
+        time += 1
+
+    print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
     return 0
+
 
