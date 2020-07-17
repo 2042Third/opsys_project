@@ -160,8 +160,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         nextel = readyq.get()
                         tp = stat[nextel[1]]
                         stat[nextel[1]] = (4, switcht,tp[2],tp[3])
-                        stat[nextel[1]][0] = 4
-                        stat[nextel[1]][1] = switcht
+
                         swchto = 'io'
                         print(
                             'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
@@ -180,15 +179,19 @@ def SRT(data, alpha,lmda,switcht, processlist):
                 else:#switched, start cpu
                     if swchnum == i:#from switch to cpu
                         nextel = readyq.get()
-                        stat[i][0] = 3
-                        stat[i][1] = data[i][stat[i][2]][0]
+                        tp = stat[i]
+                        stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
+
                         print('time {}ms: Process {} started using the CPU for {}ms burst'.format( stat[i][1]),end='')
                         print_q(i, tmln, readyq)
                     else:#from switch to queue or io
                         if(swchto == 'io'):
-                            stat[i][0] = 1
-                            stat[i][1] = data[i][stat[i][2]][1]
+                            tp = stat[i]
+                            stat[i] = (1, data[i][stat[i][2]][1], tp[2], tp[3])
+
                         else:
+                            tp = stat[i]
+                            stat[i] = (2, -1, tp[2], tp[3])
                             stat[i][0] = 2
                             stat[i][1] = -1
 
