@@ -299,7 +299,7 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
 
-def RR(data, tcs, bne):
+def RR(data, t_slice, bne,tcs):
     if bne == 0:
         bne = True
     else:
@@ -318,6 +318,7 @@ def RR(data, tcs, bne):
     burstleft = []
     burstdone = []
     using = 0
+    sign = 0
     first_process = 1
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
@@ -343,7 +344,8 @@ def RR(data, tcs, bne):
                     print("]")
             elif actions[i][1][0] == "cpu":
                 current = actions[i][0]
-                queue.pop(0)
+                if queue != []:
+                    queue.pop(0)
                 nextaction[current] = ("io", time + data[current][burstdone[current]][0])
                 if time <= 999:
                     print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
@@ -355,6 +357,31 @@ def RR(data, tcs, bne):
                         for j in range(1, len(queue)):
                             print("", queue[j], end="")
                         print("]")
+                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
+                        nextaction[actions[i][0]] = ("expire", time + t_slice)
+                        sign = 0
+
+            elif actions[i][1][0] == "cpupmt":
+                current = actions[i][0]
+
+                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                if time <= 999:
+                    cu = processlist.index(queue[0])
+                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
+                          .format(time, queue[0], data[cu][0][1]), end="")
+                    queue.pop(0)
+                    queue.insert(0,processlist[actions[i-1][0]])
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
+                        nextaction[actions[i][0]] = ("expire", time + t_slice)
+
+
             elif actions[i][1][0] == "io":
                 current = actions[i][0]
                 burstleft[current] -= 1
@@ -399,15 +426,37 @@ def RR(data, tcs, bne):
                     for j in range(1, len(queue)):
                         print("", queue[j], end="")
                     print("]")
+
+            # time slice expire
+            elif actions[i][1][0] == "expire":
+
+                    tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
+
+                    print("time {}ms: Time slice expired; process {} preempted with {} to go [Q {}"
+                          .format(time,processlist[actions[i][0]], tleft, queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+
+                    nextaction[actions[i][0]] = ("cpupmt", time + tcs)
+
+                    #if tleft > t_slice:
+                    #   nextaction[actions[i][0]] = ("expire", time + t_slice)
+                    #    sign = 1
+
+
+
         if len(queue) > 0 and using == 0:
             current = processlist.index(queue[0])
             using = 1
             if first_process == 1:
-                nextaction[current] = ("cpu", time + tcs/2 )
+                nextaction[current] = ("cpu", time + tcs/2)
                 first_process = 0
             else:
                 nextaction[current] = ("cpu", time + tcs)
+
         time += 1
+
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
     return 0
 
