@@ -1,5 +1,4 @@
 import sys
-from queue import PriorityQueue
 global processlist
 processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -298,7 +297,7 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
 
-def RR(data, t_slice, bne,tcs):
+def RR(data, tcs, t_slice, bne):
     if bne == 0:
         bne = True
     else:
@@ -317,12 +316,13 @@ def RR(data, t_slice, bne,tcs):
     burstleft = []
     burstdone = []
     using = 0
-    sign = 0
+    timeleft = []
     first_process = 1
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         burstleft.append(len(data[i]) - 2)
         burstdone.append(0)
+        timeleft.append(0)
     finish = 0
     time = 0
     while finish < len(data):
@@ -343,9 +343,13 @@ def RR(data, t_slice, bne,tcs):
                     print("]")
             elif actions[i][1][0] == "cpu":
                 current = actions[i][0]
-                if queue != []:
-                    queue.pop(0)
-                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                queue.pop(0)
+                if timeleft[current] > t_slice and finish == len(data) - 1:
+                    nextaction[current] = ("expire", time + t_slice)
+                    timeleft[current] -= t_slice
+                else:
+                    nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                    timeleft[current] = 0
                 if time <= 999:
                     print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
                           .format(time, processlist[current], data[current][burstdone[current]][0]), end="")
@@ -356,31 +360,6 @@ def RR(data, t_slice, bne,tcs):
                         for j in range(1, len(queue)):
                             print("", queue[j], end="")
                         print("]")
-                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
-                        nextaction[actions[i][0]] = ("expire", time + t_slice)
-                        sign = 0
-
-            elif actions[i][1][0] == "cpupmt":
-                current = actions[i][0]
-
-                nextaction[current] = ("io", time + data[current][burstdone[current]][0])
-                if time <= 999:
-                    cu = processlist.index(queue[0])
-                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
-                          .format(time, queue[0], data[cu][0][1]), end="")
-                    queue.pop(0)
-                    queue.insert(0,processlist[actions[i-1][0]])
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-                    if data[current][burstdone[current]][0] > t_slice:  # or preempt left > t_slice
-                        nextaction[actions[i][0]] = ("expire", time + t_slice)
-
-
             elif actions[i][1][0] == "io":
                 current = actions[i][0]
                 burstleft[current] -= 1
@@ -425,34 +404,54 @@ def RR(data, t_slice, bne,tcs):
                     for j in range(1, len(queue)):
                         print("", queue[j], end="")
                     print("]")
-
-            # time slice expire
             elif actions[i][1][0] == "expire":
-
+                current = actions[i][0]
+                if timeleft[current] == 0:
                     tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
-
-                    print("time {}ms: Time slice expired; process {} preempted with {} to go [Q {}"
-                          .format(time,processlist[actions[i][0]], tleft, queue[0]), end="")
-                    for j in range(1, len(queue)):
-                        print("", queue[j], end="")
-                    print("]")
-
-                    nextaction[actions[i][0]] = ("cpupmt", time + tcs)
-
-                    #if tleft > t_slice:
-                    #   nextaction[actions[i][0]] = ("expire", time + t_slice)
-                    #    sign = 1
-
-
-
+                    timeleft[actions[i][0]] = tleft
+                else:
+                    tleft = timeleft[current]
+                if bne:
+                    queue.append(processlist[actions[i][0]])
+                else:
+                    queue.insert(0, processlist[actions[i][0]])
+                nextaction[current] = ("continue", tleft)
+                print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q {}"
+                      .format(time, processlist[actions[i][0]], tleft, queue[0]), end="")
+                for j in range(1, len(queue)):
+                    print("", queue[j], end="")
+                print("]")
+                using = 0
+            elif actions[i][1][0] == "continue":
+                current = actions[i][0]
+                queue.pop(0)
+                if timeleft[current] > t_slice and finish == len(data) - 1:
+                    nextaction[current] = ("expire", time + t_slice)
+                    timeleft[current] -= t_slice
+                else:
+                    nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                    timeleft[current] = 0
+                if time <= 999:
+                    print("time {}ms: Process {} started using the CPU with {}ms burst remaining [Q "
+                          .format(time, processlist[current], timeleft[current]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
         if len(queue) > 0 and using == 0:
             current = processlist.index(queue[0])
             using = 1
-            if first_process == 1:
-                nextaction[current] = ("cpu", time + tcs/2)
-                first_process = 0
+            if nextaction[current][0] == "continue":
+                nextaction[current] = ("continue", time + tcs)
             else:
-                nextaction[current] = ("cpu", time + tcs)
+                if first_process == 1:
+                    nextaction[current] = ("cpu", time + tcs/2)
+                    first_process = 0
+                else:
+                    nextaction[current] = ("cpu", time + tcs)
 
         time += 1
 
