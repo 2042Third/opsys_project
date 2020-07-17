@@ -140,7 +140,7 @@ if __name__ == '__main__':
     process = processGen(10)
     print_new(process)
     # print_test(process)
-    FCFS(process, t_cs)
+    ##FCFS(process, t_cs)
     #process = processGen(count)
     print()
     SRT(process,alpha,lmda,switcht, processlist)

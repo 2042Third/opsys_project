@@ -178,16 +178,18 @@ def SRT(data, alpha,lmda,switcht, processlist):
     print('time 0ms: Simulator started for SRT [Q <empty>]')
     while max(stat)[0] != -1:
         tmln = tmln + 1
-        #print(tmln,"new")
-        #print(stat)
+        print(tmln,"new")
+        print(stat)
         for i in range(len(data)):
 
 
 
             tp = stat[i]
             stat[i] = (tp[0],tp[1]-1,tp[2],tp[3])
-            #print(stat[i], i)
+            print(stat[i], i)
             if stat[i][0] == 3:
+                print("trying to switch {} > ?".format(stat[i][1]))
+                print(readyq.queue)
                 if stat[i][1] > readyq.queue[0][0]:
                     swchnum = readyq[0][1]
                     swchto = 'q'
@@ -240,13 +242,14 @@ def SRT(data, alpha,lmda,switcht, processlist):
 
                     else: #to next
                         tp = stat[i]
-                        stat[i] = (1, tp[1], tp[2],tp[3])
+                        stat[i] = (1, data[i][stat[i][2]][1], tp[2],tp[3])
 
                         nextel = readyq.get()
                         tp = stat[nextel[1]]
                         stat[nextel[1]] = (4, switcht,tp[2],tp[3])
 
                         swchto = 'io'
+                        swchnum = nextel[1]
                         print(
                             'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
                             end='')
@@ -268,7 +271,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         tp = stat[i]
                         stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
 
-                        print('time {}ms: Process {} started using the CPU for {}ms burst'.format( stat[i][1], processlist[i], stat[i][1]),end='')
+                        print('time {}ms: Process {} started using the CPU for {}ms burst'.format( tmln, processlist[i], stat[i][1]),end='')
                         print_q(i, tmln, readyq)
                     else:#from switch to queue or io
                         #print(i,"what is happening")
@@ -279,6 +282,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         else:
                             tp = stat[i]
                             stat[i] = (2, -1, tp[2], tp[3])
+                            readyq.put(tp[3],i)
 
 
         if(tmln > 1000):
