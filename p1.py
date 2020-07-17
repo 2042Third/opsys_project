@@ -34,7 +34,7 @@ def exprand():
     return randoms
 
 
-# generate the processes
+# generate the processes (on page5)
 # n: the number of process generates (1<=n<=26)
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
@@ -147,6 +147,8 @@ if __name__ == '__main__':
 
     # print_test(process)
     #FCFS(process, t_cs)
+    # print_test(process)
+    ##FCFS(process, t_cs)
     #process = processGen(count)
 
     #SRT(process, alpha, lmda, switcht, processlist)
