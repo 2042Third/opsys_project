@@ -16,7 +16,6 @@ def FCFS(data, tcs):
     processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     print("time 0ms: Simulator started for FCFS [Q <empty>]")
-    cpubtT = 0      # total time
     waittT = 0
     trnadT = 0
     ctsT   = 0
