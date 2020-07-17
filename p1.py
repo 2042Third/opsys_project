@@ -131,9 +131,16 @@ if __name__ == '__main__':
     count = 10
     switcht = 4
     upperbound = 300
+    t_cs = 4
+    count = 0
+    upperbound = 30
     lmda = 0.01
     alpha = 0.5
     sequence = exprand()
+    process = processGen(2)
+    print_new(process)
+    # print_test(process)
+    FCFS(process, t_cs)
     process = processGen(count)
     SRT(process,alpha,lmda,switcht, processlist)
     # print(process)
