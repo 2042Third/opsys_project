@@ -1,7 +1,7 @@
 import sys
 global processlist
 processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+               "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 '''
 Simulates first-come-first-serve modal in CPU scheduling.
 param: list data, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...]
@@ -13,12 +13,10 @@ Note:  This implementation is analogous to RR(data, INFINITY, 0).
 
 
 def FCFS(data, tcs):
-    processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     print("time 0ms: Simulator started for FCFS [Q <empty>]")
     waittT = 0
     trnadT = 0
-    ctsT   = 0
+    cts = 0
     prmpt = 0
     queue = []
     nextaction = []
@@ -26,10 +24,16 @@ def FCFS(data, tcs):
     burstdone = []
     using = 0
     first_process = 1
+    avgburst = 0
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         burstleft.append(len(data[i]) - 2)
         burstdone.append(0)
+        sum = 0
+        for j in range(len(data[i]) - 1):
+            sum += data[i][j][0]
+        avgburst += float(sum / (len(data[i]) - 1))
+    avgburst = avgburst / len(data)
     finish = 0
     time = 0
     while finish < len(data):
@@ -37,8 +41,6 @@ def FCFS(data, tcs):
         for i in range(len(data)):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
-        if len(actions) > 1:
-            prmpt += 1
         for i in range(len(actions)):
             if actions[i][1][0] == "arrive":
                 queue.append(processlist[actions[i][0]])
@@ -114,9 +116,12 @@ def FCFS(data, tcs):
                 first_process = 0
             else:
                 nextaction[current] = ("cpu", time + tcs)
+                cts += 1
         time += 1
     print("time {}ms: Simulator ended for FCFS [Q <empty>]".format(time+1))
-    return 0
+    avgwait = (time - 1 - 4*cts)
+    result = [avgburst, prmpt]
+    return result
 
 
 '''
@@ -315,11 +320,17 @@ def RR(data, tcs, t_slice, bne="END"):
     using = 0
     timeleft = []
     first_process = 1
+    avgburst = 0
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         burstleft.append(len(data[i]) - 2)
         burstdone.append(0)
         timeleft.append(0)
+        sum = 0
+        for j in range(len(data[i]) - 1):
+            sum += data[i][j][0]
+        avgburst += float(sum / (len(data[i]) - 1))
+    avgburst = avgburst / len(data)
     finish = 0
     time = 0
     while finish < len(data):
@@ -327,8 +338,6 @@ def RR(data, tcs, t_slice, bne="END"):
         for i in range(len(data)):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
-        if len(actions) > 1:
-            prmpt += 1
         for i in range(len(actions)):
             if actions[i][1][0] == "arrive":
                 queue.append(processlist[actions[i][0]])
@@ -423,6 +432,7 @@ def RR(data, tcs, t_slice, bne="END"):
                         for j in range(1, len(queue)):
                             print("", queue[j], end="")
                         print("]")
+                prmpt += 1
                 using = 0
             elif actions[i][1][0] == "continue":
                 current = actions[i][0]
@@ -458,6 +468,7 @@ def RR(data, tcs, t_slice, bne="END"):
         time += 1
 
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
-    return 0
+    result = [avgburst, prmpt]
+    return result
 
 
