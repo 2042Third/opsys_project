@@ -86,6 +86,7 @@ def FCFS(data, tcs):
                         if len(queue) == 0:
                             print("<empty>]")
                         else:
+                            # ctsT += 1
                             print(queue[0], end="")
                             for j in range(1, len(queue)):
                                 print("", queue[j], end="")
@@ -331,8 +332,7 @@ def RR(data, t_slice, bne,tcs):
         for i in range(len(data)):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
-        if len(actions) > 1:
-            prmpt += 1
+
         for i in range(len(actions)):
             if actions[i][1][0] == "arrive":
                 queue.append(processlist[actions[i][0]])
@@ -362,8 +362,8 @@ def RR(data, t_slice, bne,tcs):
                         sign = 0
 
             elif actions[i][1][0] == "cpupmt":
+                prmpt += 1
                 current = actions[i][0]
-
                 nextaction[current] = ("io", time + data[current][burstdone[current]][0])
                 if time <= 999:
                     cu = processlist.index(queue[0])
@@ -460,4 +460,10 @@ def RR(data, t_slice, bne,tcs):
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
     return 0
 
+def avgcput(data):
+    sum = 0
+    for i in range(len(data)):
+        sum += data[i][0][0]
+    avgcpu =  round(sum/len(data),3)
+    return avgcpu
 
