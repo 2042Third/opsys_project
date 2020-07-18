@@ -127,7 +127,7 @@ if __name__ == '__main__':
     t_cs  = int(sys.argv[5])
     alpha = float(sys.argv[6])
     t_slice = float(sys.argv[7])
-    bne = int(sys.argv[8])
+    bne = 'END'
 
 
     # hard coded test variables, remove when using command-line arguments
