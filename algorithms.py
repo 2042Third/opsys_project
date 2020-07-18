@@ -1,5 +1,5 @@
 import sys
-
+from queue import PriorityQueue
 from p1 import handleTies
 
 global processlist
@@ -179,7 +179,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
     waitt = 0
     waitc = 0
     swchc = 0
-
+    preec = 0
     remain = []
     arrivq = PriorityQueue()
     readyq = PriorityQueue()
@@ -190,10 +190,12 @@ def SJF(data, alpha,lmda,switcht, processlist):
     swchnum = -1
     running = -1
     finished = 0
+    bursc = 0
     for i in range(len(data)):
         stat.append((0, data[i]["arrival"], -1, tau))
         remain.append(-1)
         print('Process', processlist[i], "[NEW] (arrival time", stat[i][1], "ms)", len(data[i]) - 1, 'CPU bursts')
+        bursc = bursc + len(data[i]) - 1
         # arrivq.put((data[i]["arrival"], i))
         # print(stat[i])
 
@@ -215,7 +217,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     # print('very not ')
                     swchnum = i
                     tp = stat[i]
-
+                    waitt = waitt + tp[1] * -1
                     stat[i] = (4, switcht, tp[2], tp[3])
 
             if stat[i][1] == 0:  # something's happening
@@ -223,6 +225,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                 if stat[i][0] == 0:  # arrived and queuing
 
                     tp = stat[i]
+                    waitt = waitt + tp[1] * -1
                     stat[i] = (2, tp[1], tp[2] + 1, tp[3])
                     readyq.put((tau, i))
                     print('time {}ms: Process {} (tau {}ms) arrived; added to ready queue '.format(tmln, processlist[i],
@@ -231,6 +234,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     print_q(i, tmln, readyq)
                     if swchnum == -1:  # first CPU use
                         tp = stat[i]
+                        waitt = waitt + tp[1] * -1
                         readyq.get()
                         swchnum = i
 
@@ -239,7 +243,8 @@ def SJF(data, alpha,lmda,switcht, processlist):
 
                 elif stat[i][0] == 1:  # io'ed to ready queue
                     tp = stat[i]
-
+                    waitc = waitc + 1
+                    waitt = waitt + tp[1] * -1
                     stat[i] = (2, -1, tp[2] + 1, tp[3])
                     readyq.put((stat[i][3], i))
 
@@ -254,6 +259,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                         tp = stat[i]
                         swchto = 'io'
                         running = -2
+                        waitt = waitt + tp[1]*-1
                         stat[i] = (4, switcht, tp[2]+1, tp[3])
                         if data[i][stat[i][2]][1] == 0:
                             # print('1')
@@ -285,16 +291,19 @@ def SJF(data, alpha,lmda,switcht, processlist):
                             continue
                         nextel = readyq.get()
                         tp = stat[nextel[1]]
+                        waitt = waitt + tp[1] * -1
                         stat[nextel[1]] = (4, switcht, tp[2], tp[3])
                         swchnum = nextel[1]
 
                     else:  # to next
                         # print('3')
                         tp = stat[i]
+                        waitt = waitt + tp[1] * -1
                         stat[i] = (4, switcht, tp[2], tptau)
 
                         nextel = readyq.get()
                         tp = stat[nextel[1]]
+                        waitt = waitt + tp[1] * -1
                         stat[nextel[1]] = (4, switcht, tp[2], tp[3])
 
                         swchto = 'io'
@@ -324,7 +333,9 @@ def SJF(data, alpha,lmda,switcht, processlist):
                         running = i
                         # print("hakjshdkjahskjdh")
                         tp = stat[i]
+                        waitt = waitt + tp[1] * -1
                         if (remain[i] == -1):
+                            ccpu = ccpu + 1
                             stat[i] = (3, data[i][stat[i][2]][0], tp[2], tp[3])
                         else:
                             swchc = swchc + 1
@@ -341,6 +352,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
 
                         else:
                             tp = stat[i]
+                            waitt = waitt + tp[1] * -1
                             stat[i] = (2, -1, tp[2], tp[3])
                             readyq.put((tp[3], i))
             tp = stat[i]
@@ -349,9 +361,14 @@ def SJF(data, alpha,lmda,switcht, processlist):
 
         if (tmln > 5000):
             break
-
-
-    print("switch count", swchc)
+    ttt = 0
+    for i in range(len(stat)):
+        ttt = ttt + stat[i][1]
+    print("-- average CPU burst time:", ttcpu / ccpu, "ms")
+    print("-- average wait time:", waitt / waitc, "ms")
+    print("-- average turnaround time: {:.3f}".format(ttt / bursc))
+    print("-- total number of context switches:", swchc)
+    print("-- total number of preemptions:", preec)
     return 0
 
 
@@ -639,7 +656,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
     ttt = 0
     for i in range(len(stat)):
         ttt = ttt+stat[i][1]
-    #print("-- average CPU burst time:", ttcpu/ccpu,"ms")
+    print("-- average CPU burst time:", ttcpu/ccpu,"ms")
     print("-- average wait time:", waitt /waitc, "ms")
     print("-- average turnaround time: {:.3f}".format(ttt/bursc))
     print("-- total number of context switches:",swchc)
