@@ -119,7 +119,6 @@ if __name__ == '__main__':
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     # get all the cmd/parameters
 
-
     n = int(sys.argv[1])
     seed = int(sys.argv[2])
     lmda = float(sys.argv[3])
@@ -129,43 +128,15 @@ if __name__ == '__main__':
     t_slice = float(sys.argv[7])
     bne = 'END'
 
-
-    # hard coded test variables, remove when using command-line arguments
     switcht = 0
     switcht = t_cs
-
-
     count = 0
-
-
-
     x = 0
     srand48(seed)
     sequence = exprand()
-    process = processGen(2)
-    print_new(process)
-    # print_test(process)
+    process = processGen(n)
+
     bne = 0
-
-    # print_test(process)
-    #FCFS(process, t_cs)
-    # print_test(process)
-    ##FCFS(process, t_cs)
-    #process = processGen(count)
-
-    # print(process)
-    # print("=======test=======")
-    # print(process[0]["arrival"])
-    # print(FCFS(process))
-    # print(len(process[0]))
-
-
-    # hard coded test variables, remove when using command-line arguments
-    # function calls
-    '''
-    # FCFS
-    
-    '''
 
     f = open("simout.txt", "w")
     f.write("Algorithm FCFS\n")
@@ -176,7 +147,7 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
-
+    print_new(process)
     f.write("Algorithm SJF\n")
     result = SJF(process, alpha, lmda, switcht, processlist)
     f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
@@ -184,6 +155,7 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
+    print_new(process)
     f.write("Algorithm SRT\n")
     result = SRT(process, alpha, lmda, switcht, processlist)
     f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
