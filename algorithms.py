@@ -1,5 +1,5 @@
 import sys
-# from queue import PriorityQueue
+from queue import PriorityQueue
 from p1 import handleTies
 
 global processlist
@@ -367,12 +367,12 @@ def SJF(data, alpha,lmda,switcht, processlist):
     for i in range(len(stat)):
         ttt = ttt + stat[i][1]
     print("time {}ms: Simulator ended for SJF [Q <empty>]".format(tmln))
-    print("-- average CPU burst time:", ttcpu / ccpu, "ms")
-    print("-- average wait time:", waitt / waitc, "ms")
-    print("-- average turnaround time: {:.3f}".format(ttt / bursc))
-    print("-- total number of context switches:", swchc)
-    print("-- total number of preemptions:", preec)
-    return 0
+    # print("-- average CPU burst time:", ttcpu / ccpu, "ms")
+    # print("-- average wait time:", waitt / waitc, "ms")
+    # print("-- average turnaround time: {:.3f}".format(ttt / bursc))
+    # print("-- total number of context switches:", swchc)
+    # print("-- total number of preemptions:", preec)
+    return ttcpu / ccpu, waitt / waitc, ttt / bursc, swchc,preec
 
 
 
@@ -663,12 +663,12 @@ def SRT(data, alpha,lmda,switcht, processlist):
     for i in range(len(stat)):
         ttt = ttt+stat[i][1]
     print("time {}ms: Simulator ended for SRT [Q <empty>]".format(tmln))
-    print("-- average CPU burst time:", ttcpu/ccpu,"ms")
-    print("-- average wait time:", waitt /waitc, "ms")
-    print("-- average turnaround time: {:.3f}".format(ttt/bursc))
-    print("-- total number of context switches:",swchc)
-    print("-- total number of preemptions:", preec)
-    return 0
+    # print("-- average CPU burst time:", ttcpu/ccpu,"ms")
+    # print("-- average wait time:", waitt /waitc, "ms")
+    # print("-- average turnaround time: {:.3f}".format(ttt/bursc))
+    # print("-- total number of context switches:",swchc)
+    # print("-- total number of preemptions:", preec)
+    return ttcpu / ccpu, waitt / waitc, ttt / bursc, swchc,preec
 
 
 '''

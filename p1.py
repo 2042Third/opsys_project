@@ -1,5 +1,6 @@
 import sys
 import math
+from queue import PriorityQueue
 from math import exp, expm1
 from algorithms import *
 
@@ -118,7 +119,7 @@ if __name__ == '__main__':
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     # get all the cmd/parameters
 
-    '''
+
     n = int(sys.argv[1])
     seed = int(sys.argv[2])
     lmda = float(sys.argv[3])
@@ -126,20 +127,18 @@ if __name__ == '__main__':
     t_cs  = int(sys.argv[5])
     alpha = float(sys.argv[6])
     t_slice = float(sys.argv[7])
-    rr_add = int(sys.argv[8]
-    '''
+    bne = int(sys.argv[8])
+
 
     # hard coded test variables, remove when using command-line arguments
-    n = 2
-    seed = 2
-    switcht = 4
-    upperbound = 256
-    t_cs = 4
+    switcht = 0
+    switcht = t_cs
+
+
     count = 0
-    upperbound = 30
-    lmda = 0.01
-    alpha = 0.5
-    t_slice = 108
+
+
+
     x = 0
     srand48(seed)
     sequence = exprand()
@@ -177,8 +176,23 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
-    f.write("Algorithm RR\n")
+
+    f.write("Algorithm SJF\n")
+    result = SJF(process, alpha, lmda, switcht, processlist)
+    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    f.write("-- total number of context switches: {}\n".format(result[3]))
+    f.write("-- total number of preemptions: {}\n".format(result[4]))
+    f.write("Algorithm SRT\n")
+    result = SRT(process, alpha, lmda, switcht, processlist)
+    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    f.write("-- total number of context switches: {}\n".format(result[3]))
+    f.write("-- total number of preemptions: {}\n".format(result[4]))
     print_new(process)
+    f.write("Algorithm RR\n")
     result = RR(process, t_cs, t_slice, bne)
     f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
     f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
