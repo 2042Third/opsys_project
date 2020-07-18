@@ -172,12 +172,12 @@ def print_q(i,tmln, readyq):
         print(']')
 
 def SJF(data, alpha,lmda,switcht, processlist):
-    ttcpu = 0
-    ccpu = 0
-    waitt = 0
-    waitc = 0
-    swchc = 0
-    preec = 0
+    ttcpu = 1
+    ccpu = 1
+    waitt = 1
+    waitc = 1
+    swchc = 1
+    preec = 1
     remain = []
     arrivq = PriorityQueue()
     readyq = PriorityQueue()
@@ -391,12 +391,12 @@ Note: We use exponential averaging to estimate the next CPU burst time.
 
 
 def SRT(data, alpha,lmda,switcht, processlist):
-    ttcpu = 0
-    ccpu = 0
-    waitt = 0
-    waitc = 0
-    swchc = 0
-    preec = 0
+    ttcpu = 1
+    ccpu = 1
+    waitt = 1
+    waitc = 1
+    swchc = 1
+    preec = 1
     remain = []
     arrivq = PriorityQueue()
     readyq = PriorityQueue()

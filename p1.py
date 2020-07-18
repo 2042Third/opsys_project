@@ -4,20 +4,39 @@ from queue import PriorityQueue
 from math import exp, expm1
 from algorithms import *
 
-def srand48(seed):
-    global x
-    x = seed << 16 + 0x330e
+# def srand48(seed):
+#     global x
+#     x = seed << 16 + 0x330e
+#
+# def drand48():
+#     global x
+#     a = 25214903917
+#     c = 11
+#     m = 281474976710656
+#     n = 4294967296
+#     x = (a * x + c) & (m-1)
+#     y = x / m
+#     return y
 
-def drand48():
-    global x
-    a = 25214903917
-    c = 11
-    m = 281474976710656
-    n = 4294967296
-    x = (a * x + c) & (m-1)
-    y = x / m
-    return y
-
+class Rand48(object):
+    def __init__(self, seed):
+        self.n = seed
+    def seed(self, seed):
+        self.n = seed
+    def srand(self, seed):
+        self.n = (seed << 16) + 0x330e
+    def next(self):
+        self.n = (25214903917 * self.n + 11) & (2**48 - 1)
+        return self.n
+    def drand(self):
+        return self.next() / 2**48
+    def lrand(self):
+        return self.next() >> 17
+    def mrand(self):
+        n = self.next() >> 16
+        if n & (1 << 31):
+            n -= 1 << 32
+        return n
 
 '''
 Generates random numbers using the uniform to exponential distribution.
@@ -26,13 +45,16 @@ return: list randoms, a list of random numbers that average to 1000 set lambda =
 '''
 
 
-def exprand():
+def exprand(seed):
     global lmda, upperbound
+    rand = Rand48(seed)
+    rand.srand(seed)
     randoms = []
     for i in range(1000000):
-        x = - math.log(drand48()) / lmda
+        x = - math.log(rand.drand()) / lmda
         if x > upperbound:
             i -= 1
+            # print(x)
             continue
         randoms.append(x)
     return randoms
@@ -43,15 +65,24 @@ def exprand():
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
     # list of process dictionaries
-    global sequence
+    global sequence, rand
+
     count = 0
+    rand.srand(seed)
     process = []
     for i in range(n):
         arrival = math.floor(sequence[count])
         count += 1
+        print(sequence[0],sequence[1],sequence[2])
         process.append({})
+        #count += 4
         process[i]["arrival"] = arrival
-        burst = int(100 * drand48()) + 1
+        burst = int(100 * sequence[count]/1000) + 1
+        count += 1
+        print(sequence[3], sequence[4], sequence[5])
+        # if(burst > 100):
+        #     continue
+        print(burst)
         for j in range(burst):
             cpu = math.ceil(sequence[count])
             count += 1
@@ -61,6 +92,7 @@ def processGen(n):
                 io = math.ceil(sequence[count])
                 count += 1
             process[i][j] = (cpu, io)
+        print(process, n)
     return process
 
 
@@ -127,13 +159,14 @@ if __name__ == '__main__':
     alpha = float(sys.argv[6])
     t_slice = float(sys.argv[7])
     bne = 'END'
-
+    rand = Rand48(seed)
     switcht = 0
     switcht = t_cs
     count = 0
     x = 0
-    srand48(seed)
-    sequence = exprand()
+    # rand.srand(seed)
+    sequence = exprand(seed)
+
     process = processGen(n)
 
     bne = 0
@@ -170,3 +203,5 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
+
+    #print(sequence)
