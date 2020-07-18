@@ -1,5 +1,5 @@
 import sys
-from queue import PriorityQueue
+# from queue import PriorityQueue
 from p1 import handleTies
 
 global processlist
