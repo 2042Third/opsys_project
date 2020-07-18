@@ -3,16 +3,19 @@ import math
 from math import exp, expm1
 from algorithms import *
 
+def srand48(seed):
+    global x
+    x = seed << 16 + 0x330e
 
 def drand48():
-    global seed
+    global x
     a = 25214903917
     c = 11
     m = 281474976710656
     n = 4294967296
-    seed = (a * seed + c) % m
-    x = seed >> 16
-    return float(x / n)
+    x = (a * x + c) & (m-1)
+    y = x / m
+    return y
 
 
 '''
@@ -127,7 +130,7 @@ if __name__ == '__main__':
     '''
 
     # hard coded test variables, remove when using command-line arguments
-    seed = 2
+    n = 2
     seed = 2
     switcht = 4
     upperbound = 256
@@ -137,6 +140,8 @@ if __name__ == '__main__':
     lmda = 0.01
     alpha = 0.5
     t_slice = 108
+    x = 0
+    srand48(seed)
     sequence = exprand()
     process = processGen(2)
     print_new(process)
