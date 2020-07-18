@@ -738,7 +738,6 @@ def RR(data, tcs, t_slice, bne="END"):
                     print("]")
             elif actions[i][1][0] == "cpu":
                 burstcount += 1
-                cts += 1
                 current = actions[i][0]
                 queue.pop(0)
                 turnaround[current][burstdone[current]] = time
@@ -834,7 +833,6 @@ def RR(data, tcs, t_slice, bne="END"):
                 using = 0
             elif actions[i][1][0] == "continue":
                 burstcount += 1
-                cts += 1
                 current = actions[i][0]
                 queue.pop(0)
                 if time <= 999:
@@ -858,6 +856,7 @@ def RR(data, tcs, t_slice, bne="END"):
             using = 1
             if nextaction[current][0] == "continue":
                 nextaction[current] = ("continue", time + tcs)
+                cts += 1
             else:
                 if first_process == 1:
                     nextaction[current] = ("cpu", time + tcs / 2)
