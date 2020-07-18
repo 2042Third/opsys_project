@@ -142,7 +142,7 @@ if __name__ == '__main__':
     x = 0
     srand48(seed)
     sequence = exprand()
-    process = processGen(2)
+    process = processGen(n)
     #print_new(process)
     # print_test(process)
     bne = 0
