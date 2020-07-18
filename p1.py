@@ -51,7 +51,7 @@ def exprand(seed):
     rand.srand(seed)
     randoms = []
     for i in range(1000000):
-        x = - math.log(rand.drand()) / lmda
+        x = ((-1)* math.log(rand.drand())) / lmda
         if x > upperbound:
             i -= 1
             # print(x)
@@ -65,31 +65,43 @@ def exprand(seed):
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
     # list of process dictionaries
-    global sequence, rand
+    global sequence, rand, lmda
 
     count = 0
     rand.srand(seed)
     process = []
     for i in range(n):
-        arrival = math.floor(sequence[count])
+        x = ((-1) * math.log(rand.drand())) / lmda
+        if x > upperbound:
+            x = ((-1) * math.log(rand.drand())) / lmda
+
+
+        arrival = math.floor(x)
         count += 1
-        print(sequence[0],sequence[1],sequence[2])
+        # print(sequence[0],sequence[1],sequence[2])
         process.append({})
         #count += 4
         process[i]["arrival"] = arrival
-        burst = int(100 * sequence[count]/1000) + 1
+
+        burst = int(100 * rand.drand()) + 1
         count += 1
-        print(sequence[3], sequence[4], sequence[5])
+        # print(sequence[3], sequence[4], sequence[5])
         # if(burst > 100):
         #     continue
         print(burst)
         for j in range(burst):
-            cpu = math.ceil(sequence[count])
+            x = ((-1) * math.log(rand.drand())) / lmda
+            if x > upperbound:
+                x = ((-1) * math.log(rand.drand())) / lmda
+            cpu = math.ceil(x)
             count += 1
             if j == burst - 1:
                 io = 0
             else:
-                io = math.ceil(sequence[count])
+                x = ((-1) * math.log(rand.drand())) / lmda
+                if x > upperbound:
+                    x = ((-1) * math.log(rand.drand())) / lmda
+                io = math.ceil(x)
                 count += 1
             process[i][j] = (cpu, io)
         print(process, n)
