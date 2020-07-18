@@ -142,8 +142,8 @@ if __name__ == '__main__':
     print_new(process)
     print_test(process)
     bne = 0
-    FCFS(process, t_cs)
-    RR(process, t_cs, t_slice, bne)
+    print(FCFS(process, t_cs))
+    print(RR(process, t_cs, t_slice, bne))
 
     # print_test(process)
     #FCFS(process, t_cs)
