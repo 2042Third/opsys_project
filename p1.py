@@ -151,7 +151,7 @@ if __name__ == '__main__':
     ##FCFS(process, t_cs)
     #process = processGen(count)
 
-    #SRT(process, alpha, lmda, switcht, processlist)
+    SRT(process, alpha, lmda, switcht, processlist)
     # print(process)
     # print("=======test=======")
     # print(process[0]["arrival"])
