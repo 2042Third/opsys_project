@@ -17,8 +17,6 @@ Note:  This implementation is analogous to RR(data, INFINITY, 0).
 
 def FCFS(data, tcs):
     print("time 0ms: Simulator started for FCFS [Q <empty>]")
-    wait = 0
-    trn = 0
     cts = 0
     prmpt = 0
     queue = []
@@ -129,6 +127,7 @@ def FCFS(data, tcs):
             if first_process == 1:
                 nextaction[current] = ("cpu", time + tcs/2)
                 first_process = 0
+                cts += 1
             else:
                 nextaction[current] = ("cpu", time + tcs)
                 cts += 1
@@ -147,7 +146,6 @@ def FCFS(data, tcs):
         avgwait += runtime[i] - sum
     avgwait = avgwait / burstcount
     result = [avgburst, avgwait, avgtrn, cts, prmpt]
-    print(result)
     return result
 
 
@@ -683,26 +681,29 @@ def RR(data, tcs, t_slice, bne="END"):
     else:
         bne = True
     print("time 0ms: Simulator started for RR [Q <empty>]")
-    cpubtT = 0  # total time
-    waittT = 0
-    trnadT = 0
     cts = 0
     prmpt = 0
     queue = []
     nextaction = []
     burstleft = []
     burstdone = []
+    turnaround = []
     using = 0
     timeleft = []
     first_process = 1
     avgburst = 0
+    runtime = []
+    burstcount = 0
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
-        burstleft.append(len(data[i]) - 2)
+        burstleft.append(len(data[i]) - 1)
         burstdone.append(0)
         timeleft.append(0)
+        turnaround.append([])
+        runtime.append(data[i]["arrival"])
         sum = 0
         for j in range(len(data[i]) - 1):
+            turnaround[i].append(0)
             sum += data[i][j][0]
         avgburst += float(sum / (len(data[i]) - 1))
     avgburst = avgburst / len(data)
@@ -723,8 +724,11 @@ def RR(data, tcs, t_slice, bne="END"):
                         print("", queue[j], end="")
                     print("]")
             elif actions[i][1][0] == "cpu":
+                burstcount += 1
+                cts += 1
                 current = actions[i][0]
                 queue.pop(0)
+                turnaround[current][burstdone[current]] = time
                 if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
                     nextaction[current] = ("expire", time + t_slice)
                     timeleft[current] = data[current][burstdone[current]][0] - t_slice
@@ -746,6 +750,8 @@ def RR(data, tcs, t_slice, bne="END"):
                 burstleft[current] -= 1
                 burstdone[current] += 1
                 if burstleft[current] == 0:
+                    runtime[current] = time - runtime[current]
+                    turnaround[current][burstdone[current] - 1] = time - turnaround[current][burstdone[current] - 1] + 4
                     print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
                     if len(queue) == 0:
                         print("<empty>]")
@@ -778,7 +784,9 @@ def RR(data, tcs, t_slice, bne="END"):
                             print("]")
                 using = 0
             elif actions[i][1][0] == "ready":
+                current = actions[i][0]
                 queue.append(processlist[actions[i][0]])
+                turnaround[current][burstdone[current] - 1] = time - turnaround[current][burstdone[current] - 1] + 4
                 if time <= 999:
                     print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
                           .format(time, processlist[actions[i][0]], queue[0]), end="")
@@ -810,6 +818,8 @@ def RR(data, tcs, t_slice, bne="END"):
                 prmpt += 1
                 using = 0
             elif actions[i][1][0] == "continue":
+                burstcount += 1
+                cts += 1
                 current = actions[i][0]
                 queue.pop(0)
                 if time <= 999:
@@ -839,12 +849,21 @@ def RR(data, tcs, t_slice, bne="END"):
                     first_process = 0
                 else:
                     nextaction[current] = ("cpu", time + tcs)
-                    cts += 1
-
         time += 1
-
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
-    result = [avgburst, cts, prmpt]
+    sum = 0
+    for i in range(len(turnaround)):
+        for j in range(len(turnaround[i])):
+            sum += turnaround[i][j]
+    avgtrn = sum / (cts-prmpt)
+    avgwait = 0
+    for i in range(len(turnaround)):
+        sum = 0
+        for j in range(len(turnaround[i])):
+            sum += turnaround[i][j]
+        avgwait += runtime[i] - sum
+    avgwait = avgwait / burstcount
+    result = [avgburst, avgwait, avgtrn, cts, prmpt]
     return result
 
 
