@@ -147,8 +147,6 @@ if __name__ == '__main__':
     print_new(process)
     # print_test(process)
     bne = 0
-    print(FCFS(process, t_cs))
-    print(RR(process, t_cs, t_slice, bne))
 
     # print_test(process)
     #FCFS(process, t_cs)
@@ -156,7 +154,6 @@ if __name__ == '__main__':
     ##FCFS(process, t_cs)
     #process = processGen(count)
 
-    SJF(process, alpha, lmda, switcht, processlist)
     # print(process)
     # print("=======test=======")
     # print(process[0]["arrival"])
@@ -168,16 +165,23 @@ if __name__ == '__main__':
     # function calls
     '''
     # FCFS
-    process = processGen(n)
-    print_new(process)
-    print_log(FCFS(process))
-    process = processGen(n)
-    print_new(process)
-    print_log(SJF(process))
-    process = processGen(n)
-    print_new(process)
-    print_log(SRT(process))
-    process = processGen(n)
-    print_new(process)
-    print_log(RR(process, t, bne))
+    
     '''
+
+    f = open("simout.txt", "w")
+    f.write("Algorithm FCFS\n")
+    print_new(process)
+    result = FCFS(process, t_cs)
+    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    f.write("-- total number of context switches: {}\n".format(result[3]))
+    f.write("-- total number of preemptions: {}\n".format(result[4]))
+    f.write("Algorithm RR\n")
+    print_new(process)
+    result = RR(process, t_cs, t_slice, bne)
+    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    f.write("-- total number of context switches: {}\n".format(result[3]))
+    f.write("-- total number of preemptions: {}\n".format(result[4]))
