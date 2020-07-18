@@ -88,7 +88,6 @@ def processGen(n):
         # print(sequence[3], sequence[4], sequence[5])
         # if(burst > 100):
         #     continue
-        print(burst)
         for j in range(burst):
             x = ((-1) * math.log(rand.drand())) / lmda
             if x > upperbound:
@@ -104,7 +103,6 @@ def processGen(n):
                 io = math.ceil(x)
                 count += 1
             process[i][j] = (cpu, io)
-        print(process, n)
     return process
 
 
@@ -162,7 +160,7 @@ if __name__ == '__main__':
     processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     # get all the cmd/parameters
-
+    '''
     n = int(sys.argv[1])
     seed = int(sys.argv[2])
     lmda = float(sys.argv[3])
@@ -170,6 +168,14 @@ if __name__ == '__main__':
     t_cs  = int(sys.argv[5])
     alpha = float(sys.argv[6])
     t_slice = float(sys.argv[7])
+    '''
+    n = 2
+    seed = 2
+    lmda = 0.01
+    upperbound = 256
+    t_cs = 4
+    alpha = 0.5
+    t_slice = 128
     bne = 'END'
     rand = Rand48(seed)
     switcht = 0

@@ -29,6 +29,7 @@ def FCFS(data, tcs):
     turnaround = []
     runtime = []
     burstcount = 0
+    content_switch = 0
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         runtime.append(data[i]["arrival"])
@@ -77,6 +78,7 @@ def FCFS(data, tcs):
                 current = actions[i][0]
                 burstleft[current] -= 1
                 burstdone[current] += 1
+                content_switch = time + tcs/2
                 if burstleft[current] == 0:
                     turnaround[current][burstdone[current]-1] = time - turnaround[current][burstdone[current]-1] + 4
                     runtime[current] = time - runtime[current]
@@ -128,11 +130,11 @@ def FCFS(data, tcs):
                 nextaction[current] = ("cpu", time + tcs/2)
                 first_process = 0
                 cts += 1
-            elif finish == len(data) - 1:
-                nextaction[current] = ("cpu", time + tcs/2)
+            elif time <= content_switch:
+                nextaction[current] = ("cpu", content_switch + tcs/2)
                 cts += 1
             else:
-                nextaction[current] = ("cpu", time + tcs)
+                nextaction[current] = ("cpu", time + tcs/2)
                 cts += 1
         time += 1
     print("time {}ms: Simulator ended for FCFS [Q <empty>]".format(time+1))
@@ -704,6 +706,7 @@ def RR(data, tcs, t_slice, bne="END"):
     avgburst = 0
     runtime = []
     burstcount = 0
+    content_switch = 0
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         burstleft.append(len(data[i]) - 1)
@@ -759,6 +762,7 @@ def RR(data, tcs, t_slice, bne="END"):
                 current = actions[i][0]
                 burstleft[current] -= 1
                 burstdone[current] += 1
+                content_switch = time + tcs/2
                 if burstleft[current] == 0:
                     runtime[current] = time - runtime[current]
                     turnaround[current][burstdone[current] - 1] = time - turnaround[current][burstdone[current] - 1] + 4
@@ -772,7 +776,7 @@ def RR(data, tcs, t_slice, bne="END"):
                         print("]")
                     finish += 1
                 else:
-                    nextaction[current] = ("ready", time + data[current][burstdone[current]-1][1] + tcs/2)
+                    nextaction[current] = ("ready", int(time + data[current][burstdone[current]-1][1] + tcs/2))
                     if time <= 999:
                         print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
                               .format(time, processlist[current], burstleft[actions[i][0]]), end="")
@@ -804,20 +808,17 @@ def RR(data, tcs, t_slice, bne="END"):
                         print("", queue[j], end="")
                     print("]")
             elif actions[i][1][0] == "expire":
+                content_switch = time + tcs / 2
                 current = actions[i][0]
                 if timeleft[current] == 0:
                     tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
                     timeleft[actions[i][0]] = tleft
                 else:
                     tleft = timeleft[current]
-                if bne:
-                    queue.append(processlist[actions[i][0]])
-                else:
-                    queue.insert(0, processlist[actions[i][0]])
                 nextaction[current] = ("continue", tleft)
                 if time <= 999:
-                    print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q {}"
-                          .format(time, processlist[actions[i][0]], tleft, queue[0]), end="")
+                    print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
+                          .format(time, processlist[actions[i][0]], tleft), end="")
                     if len(queue) == 0:
                         print("<empty>]")
                     else:
@@ -825,6 +826,10 @@ def RR(data, tcs, t_slice, bne="END"):
                         for j in range(1, len(queue)):
                             print("", queue[j], end="")
                         print("]")
+                if bne:
+                    queue.append(processlist[actions[i][0]])
+                else:
+                    queue.insert(0, processlist[actions[i][0]])
                 prmpt += 1
                 using = 0
             elif actions[i][1][0] == "continue":
@@ -846,7 +851,7 @@ def RR(data, tcs, t_slice, bne="END"):
                     nextaction[current] = ("expire", time + t_slice)
                     timeleft[current] -= t_slice
                 else:
-                    nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                    nextaction[current] = ("io", time + timeleft[current])
                     timeleft[current] = 0
         if len(queue) > 0 and using == 0:
             current = processlist.index(queue[0])
@@ -857,11 +862,11 @@ def RR(data, tcs, t_slice, bne="END"):
                 if first_process == 1:
                     nextaction[current] = ("cpu", time + tcs / 2)
                     first_process = 0
-                elif finish == len(data) - 1:
-                    nextaction[current] = ("cpu", time + tcs / 2)
+                elif time <= content_switch:
+                    nextaction[current] = ("cpu", content_switch + tcs / 2)
                     cts += 1
                 else:
-                    nextaction[current] = ("cpu", time + tcs)
+                    nextaction[current] = ("cpu", time + tcs / 2)
                     cts += 1
         time += 1
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
