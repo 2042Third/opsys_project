@@ -90,7 +90,7 @@ def FCFS(data, tcs):
                         print("]")
                     finish += 1
                 else:
-                    nextaction[current] = ("ready", time + data[current][burstdone[current]-1][1])
+                    nextaction[current] = ("ready", int(time + data[current][burstdone[current]-1][1] + tcs/2))
                     if time <= 999:
                         print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
                               .format(time, processlist[current], burstleft[actions[i][0]]), end="")
@@ -127,6 +127,9 @@ def FCFS(data, tcs):
             if first_process == 1:
                 nextaction[current] = ("cpu", time + tcs/2)
                 first_process = 0
+                cts += 1
+            elif finish == len(data) - 1:
+                nextaction[current] = ("cpu", time + tcs/2)
                 cts += 1
             else:
                 nextaction[current] = ("cpu", time + tcs)
@@ -769,7 +772,7 @@ def RR(data, tcs, t_slice, bne="END"):
                         print("]")
                     finish += 1
                 else:
-                    nextaction[current] = ("ready", time + data[current][burstdone[current]-1][1])
+                    nextaction[current] = ("ready", time + data[current][burstdone[current]-1][1] + tcs/2)
                     if time <= 999:
                         print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
                               .format(time, processlist[current], burstleft[actions[i][0]]), end="")
@@ -852,10 +855,14 @@ def RR(data, tcs, t_slice, bne="END"):
                 nextaction[current] = ("continue", time + tcs)
             else:
                 if first_process == 1:
-                    nextaction[current] = ("cpu", time + tcs/2)
+                    nextaction[current] = ("cpu", time + tcs / 2)
                     first_process = 0
+                elif finish == len(data) - 1:
+                    nextaction[current] = ("cpu", time + tcs / 2)
+                    cts += 1
                 else:
                     nextaction[current] = ("cpu", time + tcs)
+                    cts += 1
         time += 1
     print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
     sum = 0
