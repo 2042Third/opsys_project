@@ -7,7 +7,7 @@ from algorithms import *
 def drand48():
     global seed
     a = 25214903917
-    c = 138
+    c = 11
     m = 281474976710656
     n = 4294967296
     seed = (a * seed + c) % m
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     sequence = exprand()
     process = processGen(2)
     print_new(process)
-    print_test(process)
+    # print_test(process)
     bne = 0
     print(FCFS(process, t_cs))
     print(RR(process, t_cs, t_slice, bne))
