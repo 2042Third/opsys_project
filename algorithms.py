@@ -157,7 +157,8 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 '''
 
 
-def RR(data, tcs, t_slice, bne="END"):
+def RR(data, tcs, t_slice, bne):
+    print(bne)
     if bne == "BEGINNING":
         bne = False
     else:
@@ -213,7 +214,7 @@ def RR(data, tcs, t_slice, bne="END"):
                 wait[current][-1] = time - wait[current][-1] - tcs/2
                 if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
                     nextaction[current] = ("expire", time + t_slice)
-                    timeleft[current] = data[current][burstdone[current]][0] - t_slice
+                    timeleft[current] = int(data[current][burstdone[current]][0] - t_slice)
                 else:
                     nextaction[current] = ("io", time + data[current][burstdone[current]][0])
                     timeleft[current] = 0
@@ -277,10 +278,10 @@ def RR(data, tcs, t_slice, bne="END"):
                 content_switch = time + tcs / 2
                 wait[current].append(time + tcs/2)
                 if timeleft[current] == 0:
-                    tleft = data[current][burstdone[current]][0] - t_slice
+                    tleft = int(data[current][burstdone[current]][0] - t_slice)
                     timeleft[actions[i][0]] = tleft
                 else:
-                    tleft = timeleft[current]
+                    tleft = int(timeleft[current])
                 nextaction[current] = ("continue", tleft)
                 if time <= 999:
                     print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
