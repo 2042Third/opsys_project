@@ -51,8 +51,8 @@ def FCFS(data, tcs):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
         for i in range(len(actions)):
+            current = actions[i][0]
             if actions[i][1][0] == "arrive":
-                current = actions[i][0]
                 queue.append(processlist[actions[i][0]])
                 wait[current][burstdone[current]] = time
                 if time <= 999:
@@ -63,7 +63,6 @@ def FCFS(data, tcs):
                     print("]")
             elif actions[i][1][0] == "cpu":
                 wait[current][burstdone[current]] = time - wait[current][burstdone[current]] - tcs/2
-                current = actions[i][0]
                 queue.pop(0)
                 nextaction[current] = ("io", time + data[current][burstdone[current]][0])
                 if time <= 999:
@@ -77,7 +76,6 @@ def FCFS(data, tcs):
                             print("", queue[j], end="")
                         print("]")
             elif actions[i][1][0] == "io":
-                current = actions[i][0]
                 burstleft[current] -= 1
                 burstdone[current] += 1
                 content_switch = time + tcs/2
@@ -115,7 +113,6 @@ def FCFS(data, tcs):
                             print("]")
                 using = 0
             elif actions[i][1][0] == "ready":
-                current = actions[i][0]
                 wait[current][burstdone[current]] = time
                 queue.append(processlist[actions[i][0]])
                 if time <= 999:
@@ -176,7 +173,6 @@ def RR(data, tcs, t_slice, bne="END"):
     timeleft = []
     using = 0
     first_process = 1
-    avgburst = 0
     runtime = []
     burstcount = 0
     content_switch = 0
@@ -281,7 +277,7 @@ def RR(data, tcs, t_slice, bne="END"):
                 content_switch = time + tcs / 2
                 wait[current].append(time + tcs/2)
                 if timeleft[current] == 0:
-                    tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
+                    tleft = data[current][burstdone[current]][0] - t_slice
                     timeleft[actions[i][0]] = tleft
                 else:
                     tleft = timeleft[current]
@@ -346,7 +342,7 @@ def RR(data, tcs, t_slice, bne="END"):
         for j in range(len(wait[i])):
             sumwait += wait[i][j]
     avgwait = sumwait / bursts
-    avgtrn = avgburst + avgwait + tcs
+    avgtrn = avgburst + avgwait + tcs + (tcs * prmpt / bursts)
     result = [avgburst, avgwait, avgtrn, cts, prmpt]
     return result
 
