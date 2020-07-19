@@ -279,7 +279,7 @@ def RR(data, tcs, t_slice, bne="END"):
                     print("]")
             elif actions[i][1][0] == "expire":
                 content_switch = time + tcs / 2
-                wait[current][-1] = time - wait[current][-1] - tcs/2
+                wait[current].append(time + tcs/2)
                 if timeleft[current] == 0:
                     tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
                     timeleft[actions[i][0]] = tleft
@@ -305,7 +305,7 @@ def RR(data, tcs, t_slice, bne="END"):
             elif actions[i][1][0] == "continue":
                 burstcount += 1
                 queue.pop(0)
-                wait[current][burstdone[current]] = time - wait[current][burstdone[current]] - tcs/2
+                wait[current][-1] = time - wait[current][-1] - tcs/2
                 if time <= 999:
                     print("time {}ms: Process {} started using the CPU with {}ms burst remaining [Q "
                           .format(time, processlist[current], timeleft[current]), end="")
