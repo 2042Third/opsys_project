@@ -210,7 +210,6 @@ def RR(data, tcs, t_slice, bne):
                     print("]")
             elif actions[i][1][0] == "cpu":
                 burstcount += 1
-                queue.pop(0)
                 wait[current][-1] = time - wait[current][-1] - tcs/2
                 if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
                     nextaction[current] = ("expire", time + t_slice)
@@ -282,7 +281,7 @@ def RR(data, tcs, t_slice, bne):
                     timeleft[actions[i][0]] = tleft
                 else:
                     tleft = int(timeleft[current])
-                nextaction[current] = ("continue", tleft)
+                nextaction[current] = ("add", int(time + tcs/2))
                 if time <= 999:
                     print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
                           .format(time, processlist[actions[i][0]], tleft), end="")
@@ -293,15 +292,10 @@ def RR(data, tcs, t_slice, bne):
                         for j in range(1, len(queue)):
                             print("", queue[j], end="")
                         print("]")
-                if bne:
-                    queue.append(processlist[actions[i][0]])
-                else:
-                    queue.insert(0, processlist[actions[i][0]])
                 prmpt += 1
                 using = 0
             elif actions[i][1][0] == "continue":
                 burstcount += 1
-                queue.pop(0)
                 wait[current][-1] = time - wait[current][-1] - tcs/2
                 if time <= 999:
                     print("time {}ms: Process {} started using the CPU with {}ms burst remaining [Q "
@@ -319,8 +313,15 @@ def RR(data, tcs, t_slice, bne):
                 else:
                     nextaction[current] = ("io", time + timeleft[current])
                     timeleft[current] = 0
+            elif actions[i][1][0] == "add":
+                if bne:
+                    queue.append(processlist[current])
+                else:
+                    queue.insert(0, processlist[current])
+                nextaction[current] = ("continue", 0)
         if len(queue) > 0 and using == 0:
             current = processlist.index(queue[0])
+            queue.pop(0)
             using = 1
             cts += 1
             if nextaction[current][0] == "continue":

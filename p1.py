@@ -65,32 +65,27 @@ def exprand(seed):
 # using the drand() to identify the number of bursts time; using the exp-random to identify the cpu and I/O burst time
 def processGen(n):
     # list of process dictionaries
-    global sequence, rand, lmda
+    global sequence, rand, lmda, upperbound
 
     count = 0
     rand.srand(seed)
     process = []
     for i in range(n):
         x = ((-1) * math.log(rand.drand())) / lmda
-        if x > upperbound:
+        while x > upperbound:
             x = ((-1) * math.log(rand.drand())) / lmda
-
 
         arrival = math.floor(x)
         count += 1
-        # print(sequence[0],sequence[1],sequence[2])
         process.append({})
         #count += 4
         process[i]["arrival"] = arrival
 
         burst = int(100 * rand.drand()) + 1
         count += 1
-        # print(sequence[3], sequence[4], sequence[5])
-        # if(burst > 100):
-        #     continue
         for j in range(burst):
             x = ((-1) * math.log(rand.drand())) / lmda
-            if x > upperbound:
+            while x > upperbound:
                 x = ((-1) * math.log(rand.drand())) / lmda
             cpu = math.ceil(x)
             count += 1
@@ -98,7 +93,7 @@ def processGen(n):
                 io = 0
             else:
                 x = ((-1) * math.log(rand.drand())) / lmda
-                if x > upperbound:
+                while x > upperbound:
                     x = ((-1) * math.log(rand.drand())) / lmda
                 io = math.ceil(x)
                 count += 1
@@ -167,6 +162,10 @@ if __name__ == '__main__':
     t_cs  = int(sys.argv[5])
     alpha = float(sys.argv[6])
     t_slice = float(sys.argv[7])
+    if len(sys.argv) == 9:
+        bne = sys.argv[8]
+    else:
+        bne = "END"
     # n = 2
     # seed = 2
     # lmda = 0.01
@@ -174,18 +173,12 @@ if __name__ == '__main__':
     # t_cs = 4
     # alpha = 0.5
     # t_slice = 128
-    bne = 'END'
+    # bne = 'END'
     rand = Rand48(seed)
-    switcht = 0
-    switcht = t_cs
     count = 0
     x = 0
     # rand.srand(seed)
-    sequence = exprand(seed)
-
     process = processGen(n)
-
-    bne = 0
 
     f = open("simout.txt", "w")
     f.write("Algorithm FCFS\n")
@@ -196,21 +189,23 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
-
+    print()
     f.write("Algorithm SJF\n")
-    result = SJF(process, alpha, lmda, switcht, processlist)
+    result = SJF(process, alpha, lmda, t_cs, processlist)
     f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
     f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
+    print()
     f.write("Algorithm SRT\n")
-    result = SRT(process, alpha, lmda, switcht, processlist)
+    result = SRT(process, alpha, lmda, t_cs, processlist)
     f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
     f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
+    print()
     print_new(process)
     f.write("Algorithm RR\n")
     result = RR(process, t_cs, t_slice, bne)
