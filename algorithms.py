@@ -1,4 +1,5 @@
 import sys
+import math
 from queue import PriorityQueue
 from p1 import handleTies
 
@@ -203,9 +204,9 @@ def SJF(data, alpha,lmda,switcht, processlist):
     tmln = 0
     print('time 0ms: Simulator started for SJF [Q <empty>]')
     while max(stat)[0] != -1:
-        tmln = tmln + 1
+
         # print(tmln,"new")
-        # print(swchnum)
+        # print(switcht)
         for i in range(len(data)):
 
             # print(stat, i)
@@ -213,13 +214,13 @@ def SJF(data, alpha,lmda,switcht, processlist):
                 continue
 
             # print(stat[i][0],running,stat[i][0])
-            if stat[i][0] != 4 and running == -2 and stat[i][0] == 2:
+            if stat[i][0] == 2 and running == -2 :
                 if len(readyq.queue) != 0:
                     # print('very not ')
                     swchnum = i
-                    tp = stat[i]
+                    tp = stat[readyq.get()[1]]
                     waitt = waitt + tp[1] * -1
-                    stat[i] = (4, switcht, tp[2], tp[3])
+                    stat[i] = (4, switcht/2 - 1, tp[2], tp[3])
 
             if stat[i][1] == 0:  # something's happening
                 # print("not rifhgt")
@@ -239,8 +240,8 @@ def SJF(data, alpha,lmda,switcht, processlist):
                         waitt = waitt + tp[1] * -1
                         readyq.get()
                         swchnum = i
-
-                        stat[i] = (4, switcht, tp[2], tp[3])
+                        # print(switcht)
+                        stat[i] = (4, switcht/2, tp[2], tp[3])
 
 
                 elif stat[i][0] == 1:  # io'ed to ready queue
@@ -249,24 +250,48 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     waitt = waitt + tp[1] * -1
                     stat[i] = (2, -1, tp[2] + 1, tp[3])
                     readyq.put((stat[i][3], i))
+                    if tmln < 1000:
+                        print("time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln,processlist[i],stat[i][3]),end='')
+                        print('added to ready queue ',end='')
+                        print_q(i, tmln, readyq)
 
                 elif stat[i][0] == 3:  # finished running, to next
+                    running = -2
                     # stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
-                    # print("in running")
-                    tptau = t * alpha + (1 - alpha) * stat[i][3]
-                    tptau = int(tptau)
-                    if len(readyq.queue) == 0 and data[i][stat[i][2]][1] != 0:
+                    print(stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0])
+                    tptau = stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0]
+                    tptau = math.ceil(tptau)
+                    if tmln < 1000:
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i],
+                                                                                             stat[i][3]),
+                            end='')
+                        print(' {} bursts to go '.format(len(data[i])-stat[i][2]-2), end='')
+                        print_q(i, tmln, readyq)
+                        print(
+                            'time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau, processlist[i], ),
+                            end='')
+                        print_q(i, tmln, readyq)
+                    if len(readyq.queue) == 0 and data[i][stat[i][2]][1] != 0 and len(stat) != 1:
                         # print('1123123123',finished)
+                        if tmln < 1000:
+
+
+                            print(
+                                'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
+                                end='')
+                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1] + tmln+switcht), end='')
+                            print_q(i, tmln, readyq)
                         # if finished == len(stat) - 1:
                         tp = stat[i]
                         swchto = 'io'
                         running = -2
                         waitt = waitt + tp[1]*-1
-                        stat[i] = (4, switcht, tp[2]+1, tp[3])
+                        stat[i] = (4, switcht, tp[2]+1, tptau)
                         if data[i][stat[i][2]][1] == 0:
                             # print('1')
                             tp = stat[i]
-                            stat[i] = (-1, tmln - data[i]["arrival"], tp[2], tp[3])
+                            stat[i] = (-1, tmln - data[i]["arrival"], tp[2], tptau)
                             finished = finished + 1
                         # continue
                     # else:
@@ -275,62 +300,58 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     elif data[i][stat[i][2]][1] == 0:  # finished
                         # print('2',finished)
                         if (finished == len(stat)):
+                            print("time {}ms: Simulator ended for SJF [Q <empty>]".format(tmln))
                             return
                         tp = stat[i]
-                        stat[i] = (-1, tmln - data[i]["arrival"], tp[2], tp[3])
+                        stat[i] = (-1, tmln - data[i]["arrival"], tp[2], tptau)
                         finished = finished + 1
-                        if tmln < 1000:
-                            print(
-                                'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i],
-                                                                                                 stat[i][3]),
-                                end='')
-                            print(' {} bursts to go '.format(0), end='')
-                            print_q(i, tmln, readyq)
+
                         if len(readyq.queue) == 0:
                             tp = stat[i]
                             running = -2
-                            stat[i] = (tp[0], tp[1] - 1, tp[2], tp[3])
+                            stat[i] = (tp[0], tp[1] - 1, tp[2], tptau)
                             continue
                         nextel = readyq.get()
                         tp = stat[nextel[1]]
                         waitt = waitt + tp[1] * -1
-                        stat[nextel[1]] = (4, switcht, tp[2], tp[3])
+                        stat[nextel[1]] = (4, switcht, tp[2], tptau)
                         swchnum = nextel[1]
 
                     else:  # to next
                         # print('3')
                         tp = stat[i]
                         waitt = waitt + tp[1] * -1
-                        stat[i] = (4, switcht, tp[2], tptau)
+                        stat[i] = (4, switcht/2, tp[2], tptau)
 
-                        nextel = readyq.get()
-                        tp = stat[nextel[1]]
-                        waitt = waitt + tp[1] * -1
-                        stat[nextel[1]] = (4, switcht, tp[2], tp[3])
 
+                        timediv = 2
                         swchto = 'io'
-                        swchnum = nextel[1]
+                        swchnum = -1
+                        if len(readyq.queue) >= 1:
+                            timediv = 1
+                            stat[i] = (4, switcht , tp[2], tptau)
+                            nextel = readyq.get()
+                            tp = stat[nextel[1]]
+                            swchnum = nextel[1]
+                            waitt = waitt + tp[1] * -1
+                            stat[nextel[1]] = (4, switcht, tp[2], tp[3])
                         if tmln < 1000:
-                            print(
-                                'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
-                                end='')
-                            print(' {} bursts to go '.format(len(data[i]) - 1), end='')
-                            print_q(i, tmln, readyq)
-                            print(
-                                'time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau, processlist[i], ),
-                                end='')
-                            print_q(i, tmln, readyq)
+
+
                             print(
                                 'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
                                 end='')
-                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1] + tmln), end='')
+                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1] + tmln+int(switcht/timediv)), end='')
                             print_q(i, tmln, readyq)
+                        # print(len(readyq.queue))
+
 
                         # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
                 else:  # switched, start cpu
 
                     # print("switch triggered")
                     if swchnum == i:  # from switch to cpu
+                        running = i
                         swchc = swchc + 1
                         # nextel = readyq.get()
                         running = i
@@ -346,12 +367,13 @@ def SJF(data, alpha,lmda,switcht, processlist):
                             stat[i] = (3, remain[i], tp[2], tp[3])
                         running = i
                         if tmln < 1000:
-                            print('time {}ms: Process {} started using the CPU for {}ms burst'.format(tmln, processlist[i],
+                            print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst'.format(tmln, processlist[i],stat[i][3],
                                                                                                       stat[i][1]), end='')
                             print_q(i, tmln, readyq)
                     else:  # from switch to queue or io
-                        # print(i,"what is happening")
+
                         if (swchto == 'io'):
+                            # print(data[i][stat[i][2]][1], "what is happening")
                             tp = stat[i]
                             stat[i] = (1, data[i][stat[i][2]][1], tp[2], tp[3])
 
@@ -362,8 +384,9 @@ def SJF(data, alpha,lmda,switcht, processlist):
                             readyq.put((tp[3], i))
             tp = stat[i]
             stat[i] = (tp[0], tp[1] - 1, tp[2], tp[3])
-            # print(stat)
-
+            # if tmln < 1000:
+            #     print(stat)
+        tmln = tmln + 1
         if (tmln > 5000):
             break
     ttt = 0
@@ -400,7 +423,9 @@ def SRT(data, alpha,lmda,switcht, processlist):
     waitc = 1
     swchc = 1
     preec = 1
+    swching = False
     remain = []
+    print(switcht)
     arrivq = PriorityQueue()
     readyq = PriorityQueue()
     stat = []
@@ -417,29 +442,33 @@ def SRT(data, alpha,lmda,switcht, processlist):
         remain.append(-1)
         print('Process',processlist[i],"[NEW] (arrival time",stat[i][1],"ms)",len(data[i])-1,'CPU bursts' )
         bursc = bursc + len(data[i])-1
-        #arrivq.put((data[i]["arrival"], i))
-        #print(stat[i])
 
     tmln = 0
     print('time 0ms: Simulator started for SRT [Q <empty>]')
     while max(stat)[0] != -1:
-        tmln = tmln + 1
-        # print(tmln,"new")
-        #print(swchnum)
-        for i in range(len(data)):
 
+        # print(tmln,"new")
+        # print(remain)
+        for i in range(len(data)):
+            # print(swchnum)
             #print(stat, i)
             if stat[i][0] == -1:
                 continue
-
-
-            if stat[i][0] != 4 and running == -2 and stat[i][0] == 2:
+            # if tmln > 310 and tmln < 450:
+            #     print(stat[i][0], running )
+            if stat[i][0] ==2 and running == -2:
                 if len(readyq.queue) != 0:
-                    #print('very not ')
+                    running = i
+                    # print('very not ', processlist[i])
                     swchnum = i
                     tp = stat[i]
+                    remain[i] = -1
+                    readyq.get()
+                    readyq.put((0,i))
+
+                    # print(readyq.queue)
                     waitt = waitt + tp[1]*-1
-                    stat[i] = (4, switcht, tp[2], tp[3])
+                    stat[i] = (4, switcht/2 - 1, tp[2], tp[3])
 
 
             if stat[i][1] == 0:#something's happening
@@ -456,10 +485,10 @@ def SRT(data, alpha,lmda,switcht, processlist):
                     print_q(i,tmln,readyq)
                     if swchnum == -1:#first CPU use
                         tp = stat[i]
-                        readyq.get()
+                        # readyq.get()
                         swchnum = i
+                        stat[i] = (4,switcht/2,tp[2], tp[3])
 
-                        stat[i] = (4,switcht,tp[2], tp[3])
                     elif (stat[running][1] > stat[i][3]):
                         #print(123123123)
                         swchto = 'q'
@@ -498,19 +527,44 @@ def SRT(data, alpha,lmda,switcht, processlist):
                     tp = stat[i]
                     # print('real trying to switch')
                     #print(stat[running][1] , stat[i][3])
-                    if (stat[running][1] > stat[i][3]):
-                        #print(11)
+                    # print(99)
+                    waitc = waitc + 1
+                    stat[i] = (2, -1, tp[2] + 1, tp[3])
+                    readyq.put((stat[i][3], i))
+                    # if stat[i][0] == 2 and running == -2:
+                    #     if len(readyq.queue) != 0:
+                    #         running = i
+                    #         print('very not ', processlist[i])
+                    #         swchnum = i
+                    #         tp = stat[i]
+                    #         remain[i] = -1
+                    #         readyq.get()
+                    #         readyq.put((0, i))
+                    #
+                    #         print(readyq.queue)
+                    #         waitt = waitt + tp[1] * -1
+                    #         stat[i] = (4, switcht / 2 - 1, tp[2], tp[3])
+                    if (running >= 0 and stat[running][1] > stat[i][3] and not swching):
+                        # print(11)
                         swchto = 'q'
                         swchnum = i
+                        # readyq.put((stat[running][3], running))
+                        if tmln < 1000:
+                            print(
+                                "time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln, processlist[i], stat[i][3]),
+                                end='')
+                            print(' preempting {} '.format(processlist[running]), end='')
+                            print_q(i, tmln, readyq)
                         waitt = waitt + tp[1] * -1
                         stat[i] = (4, switcht, tp[2] + 1, tp[3])
                         tp = stat[running]
+
                         remain[running] = tp[1]
                         preem = True
-                        stat[running] = (4, switcht, tp[2], tp[3])
+                        stat[running] = (4, switcht/2 , tp[2], tp[3])
                         running = i
-                    elif (stat[running][1] == stat[i][3]):
-                        #print(13)
+                    elif (running >= 0 and stat[running][1] == stat[i][3] and not swching):
+                        # print(13)
                         pr = handleTies(running,i)
                         if i != pr:
                             pn = i
@@ -521,6 +575,12 @@ def SRT(data, alpha,lmda,switcht, processlist):
                             stat[i] = (2, -1, tp[2] + 1, tp[3])
                             readyq.put((stat[i][3], i))
                             continue
+                        if tmln < 1000:
+                            print(
+                                "time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln, processlist[i], stat[i][3]),
+                                end='')
+                            print(' preempting {} '.format(running), end='')
+                            print_q(i, tmln, readyq)
                         swchto = 'q'
                         swchnum = pr
                         tp = stat[pr]
@@ -531,40 +591,55 @@ def SRT(data, alpha,lmda,switcht, processlist):
                         remain[running] = tp[1]
                         stat[running] = (4,switcht,tp[2],tp[3])
                         running = pr
+                        if tmln < 1000:
+                            print(
+                                "time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln, processlist[i], stat[i][3]),
+                                end='')
+                            print(' preempting {} '.format(), end='')
+                            print_q(i, tmln, readyq)
                     else:
-                        #print(99)
-                        waitc = waitc + 1
-                        stat[i] = (2,-1,tp[2]+1,tp[3])
-                        readyq.put((stat[i][3], i))
+
+                        if tmln < 1000:
+                            print(
+                                "time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln, processlist[i], stat[i][3]),
+                                end='')
+                            print('added to ready queue ', end='')
+                            print_q(i, tmln, readyq)
 
                 elif stat[i][0] == 3:#finished running, to next
+                    running = -2
                     #stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
                     # print("in running")
                     preem = False
-                    tptau = t * alpha + (1 - alpha) * stat[i][3]
-                    tptau =  int(tptau)
-                    if len(readyq.queue) == 0 and data[i][stat[i][2]][1] != 0:
+                    tptau = stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0]
+                    tptau = math.ceil(tptau)
+                    if tmln < 1000:
+                        print(
+                            'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i],
+                                                                                             stat[i][3]),
+                            end='')
+                        print(' {} bursts to go '.format(len(data[i]) - stat[i][2] - 2), end='')
+                        print_q(i, tmln, readyq)
+                        print(
+                            'time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau, processlist[i], ),
+                            end='')
+                        print_q(i, tmln, readyq)
+                    if len(readyq.queue) == 0 and data[i][stat[i][2]][1] != 0 and len(stat) != 1:
                         # print('1123123123',finished)
                         # if finished == len(stat) - 1:
-                        tp = stat[i]
-                        swchto = 'io'
-                        running = -2
-                        stat[i] = (4, switcht, tp[2]+1, tp[3])
                         if tmln < 1000:
-                            print(
-                                'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
-                                end='')
-                            print(' {} bursts to go '.format(len(data[i]) - stat[i][2]-2), end='')
-                            print_q(i, tmln, readyq)
-                            print(
-                                'time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau, processlist[i], ),
-                                end='')
-                            print_q(i, tmln, readyq)
                             print(
                                 'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
                                 end='')
-                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1] + tmln), end='')
+                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1] + tmln+switcht/2), end='')
                             print_q(i, tmln, readyq)
+                        # print(data[i][stat[i][2]])
+                        tp = stat[i]
+                        swchto = 'io'
+                        swchnum = -1
+                        running = -2
+                        stat[i] = (4, switcht/2, tp[2], tptau)
+
                         if data[i][stat[i][2]][1] == 0:
                             #print('1')
                             tp = stat[i]
@@ -576,13 +651,23 @@ def SRT(data, alpha,lmda,switcht, processlist):
 
 
                     elif data[i][stat[i][2]][1] == 0:#finished
-                        #print('2',finished)
+                        # print('2',finished)
                         if(finished == len(stat)):
-                            return
+                            ttt = 0
+                            for i in range(len(stat)):
+                                ttt = ttt + stat[i][1]
+                            print("time {}ms: Simulator ended for SRT [Q <empty>]".format(tmln))
+                            # print("-- average CPU burst time:", ttcpu/ccpu,"ms")
+                            # print("-- average wait time:", waitt /waitc, "ms")
+                            # print("-- average turnaround time: {:.3f}".format(ttt/bursc))
+                            # print("-- total number of context switches:",swchc)
+                            # print("-- total number of preemptions:", preec)
+                            return ttcpu / ccpu, waitt / waitc, ttt / bursc, swchc, preec
                         tp = stat[i]
                         stat[i] = (-1,tmln - data[i]["arrival"], tp[2],tptau)
                         finished = finished +1
                         if tmln < 1000:
+
                             print(
                                 'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], stat[i][3]),
                                 end='')
@@ -592,7 +677,7 @@ def SRT(data, alpha,lmda,switcht, processlist):
                             tp = stat[i]
                             stat[i] = (tp[0], tp[1] - 1, tp[2], tptau)
                             continue
-                        nextel = readyq.get()
+                        nextel = readyq.queue[0]
                         tp = stat[nextel[1]]
                         waitt = waitt + tp[1] * -1
                         stat[nextel[1]] = (4,switcht,tp[2],tp[3])
@@ -601,66 +686,126 @@ def SRT(data, alpha,lmda,switcht, processlist):
                     else: #to next
                         # print('3')
                         tp = stat[i]
-                        stat[i] = (4, switcht, tp[2],tptau)
-
-                        nextel = readyq.get()
-                        tp = stat[nextel[1]]
-                        waitt = waitt + tp[1] * -1
-                        stat[nextel[1]] = (4, switcht,tp[2],tp[3])
-
+                        stat[i] = (4, switcht/2, tp[2],tptau)
                         swchto = 'io'
-                        swchnum = nextel[1]
+                        swchnum = -1
+                        timediv = 2
+                        if len(readyq.queue) >= 1:
+                            # print("asdasdasd")
+                            timediv = 1
+                            stat[i] = (4, switcht/2, tp[2], tptau)
+                            nextel = readyq.queue[0]
+                            swchnum = nextel[1]
+                            # print(swchnum)
+                            tp = stat[nextel[1]]
+                            waitt = waitt + tp[1] * -1
+                            stat[nextel[1]] = (4, switcht, tp[2], tp[3])
+                            swching = True
+
                         if tmln < 1000:
-                            print(
-                                'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i], tau),
-                                end='')
-                            print(' {} bursts to go '.format(len(data[i])-stat[i][2]), end='')
-                            print_q(i,tmln,readyq)
-                            print('time {}ms: Recalculated tau = {}ms for process {} '.format(tmln, tptau,processlist[i],),end='')
-                            print_q(i, tmln, readyq)
                             print(
                                 'time {}ms: Process {} switching out of CPU;'.format(tmln, processlist[i]),
                                 end='')
-                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1]+tmln),end='')
+                            print(' will block on I/O until time {}ms '.format(data[i][stat[i][2]][1]+tmln+ int(switcht/2)),end='')
                             print_q(i, tmln, readyq)
+
+
 
                         # stat[nextel[1]][1] = data[nextel[1]][stat[nextel[1]][2]][0]
                 else:#switched, start cpu
                     # print("switch triggered")
                     if swchnum == i:#from switch to cpu
+                        running = i
                         #nextel = readyq.get()
                         running = i
-                        #print("hakjshdkjahskjdh")
-
+                        # print("hakjshdkjahskjdh", preem)
+                        readyq.get()
                         tp = stat[i]
                         if(preem):
                             preec = preec + 1
                         else:
                             swchc = swchc + 1
-                        if(remain[i] == -1 or not preem):
+
+                        if( remain[i] == -1 and not preem):
+                            # print(13333,i)
                             ttcpu = ttcpu + data[i][stat[i][2]][0]
                             ccpu = ccpu +1
-
                             stat[i] = (3,data[i][stat[i][2]][0], tp[2], tp[3] )
                         else:
-                            stat[i] = (3, remain[i], tp[2], tp[3])
+                            if remain[i] == -1 :
+                                ttcpu = ttcpu + data[i][stat[i][2]][0]
+                                ccpu = ccpu + 1
+                                stat[i] = (3, data[i][stat[i][2]][0], tp[2], tp[3])
+                            else:
+                                # print(22222)
+                                stat[i] = (3, remain[i], tp[2], tp[3])
                         running = i
                         if tmln < 1000:
-                            print('time {}ms: Process {} started using the CPU for {}ms burst'.format( tmln, processlist[i], stat[i][1]),end='')
+                            print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst remaining '.format(tmln,
+                                                                                                                processlist[
+                                                                                                                    i],
+                                                                                                                stat[i][
+                                                                                                                    3],
+                                                                                                                stat[i][
+                                                                                                                    1]),
+                                  end='')
                             print_q(i, tmln, readyq)
+
                     else:#from switch to queue or io
-                        #print(i,"what is happening")
+                        # print(i,"what is happening")
                         if(swchto == 'io'):
+                            # print(88888,data[i])
                             tp = stat[i]
                             stat[i] = (1, data[i][stat[i][2]][1], tp[2], tp[3])
                         else:
+                            # print(99999)
                             tp = stat[i]
                             stat[i] = (2, -1, tp[2], tp[3])
                             readyq.put((tp[3],i))
+
+                if not preem and len(readyq.queue) != 0:
+
+                    if (running >= 0 and stat[running][3] > stat[readyq.queue[0][1]][3] and running != readyq.queue[0][1]):
+                        # print(11)
+                        preem = True
+                        swchto = 'q'
+                        swchnum = readyq.queue[0][1]
+                        tp = stat[readyq.queue[0][1]]
+                        # readyq.put((stat[running][3], running))
+                        if tmln < 1000:
+                            print(
+                                "time {}ms: Process {} (tau {}ms)".format(tmln, processlist[readyq.queue[0][1]],
+                                                                                         stat[readyq.queue[0][1]][3]),
+                                end='')
+                            print(' will preempt {} '.format(processlist[running]), end='')
+                            print_q(readyq.queue[0][1], tmln, readyq)
+                        waitt = waitt + tp[1] * -1
+                        stat[readyq.queue[0][1]] = (4, switcht - 1, tp[2] , tp[3])
+                        tp = stat[running]
+                        # print(tp)
+                        remain[running] = tp[1]
+                        preem = True
+                        stat[running] = (4, switcht / 2 -1, tp[2], tp[3])
+                        running = readyq.queue[0][1]
+                if stat[i][0] == 2 and running == -2:
+                    if len(readyq.queue) != 0:
+                        running = i
+                        # print('very not ', processlist[i])
+                        swchnum = i
+                        tp = stat[i]
+                        remain[i] = -1
+                        readyq.get()
+                        readyq.put((0, i))
+
+                        # print(readyq.queue)
+                        waitt = waitt + tp[1] * -1
+                        stat[i] = (4, switcht / 2 , tp[2], tp[3])
             tp = stat[i]
             stat[i] = (tp[0], tp[1] - 1, tp[2], tp[3])
-            # print(stat)
-        if(tmln > 5000):
+            # if tmln < 400:
+                # print(stat)
+        tmln = tmln + 1
+        if(tmln > 5100):
             break
     ttt = 0
     for i in range(len(stat)):
