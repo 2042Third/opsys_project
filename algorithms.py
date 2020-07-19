@@ -31,15 +31,18 @@ def FCFS(data, tcs):
     runtime = []
     burstcount = 0
     content_switch = 0
+    wait = []
     for i in range(len(data)):
         nextaction.append(("arrive", data[i]["arrival"]))
         runtime.append(data[i]["arrival"])
         burstleft.append(len(data[i]) - 1)
         burstdone.append(0)
+        wait.append([])
         turnaround.append([])
         sum = 0
         for j in range(len(data[i]) - 1):
             turnaround[i].append(0)
+            wait[i].append(0)
             sum += data[i][j][0]
             burstcount += 1
         avgburst += float(sum / (len(data[i]) - 1))
@@ -53,7 +56,9 @@ def FCFS(data, tcs):
                 actions.append((i, nextaction[i]))
         for i in range(len(actions)):
             if actions[i][1][0] == "arrive":
+                current = actions[i][0]
                 queue.append(processlist[actions[i][0]])
+                wait[current][burstdone[current]] = time
                 if time <= 999:
                     print("time {}ms: Process {} arrived; added to ready queue [Q {}"
                           .format(time, processlist[actions[i][0]], queue[0]), end="")
@@ -61,6 +66,7 @@ def FCFS(data, tcs):
                         print("", queue[j], end="")
                     print("]")
             elif actions[i][1][0] == "cpu":
+                wait[current][burstdone[current]] = time - wait[current][burstdone[current]] - 2
                 current = actions[i][0]
                 queue.pop(0)
                 nextaction[current] = ("io", time + data[current][burstdone[current]][0])
@@ -77,11 +83,174 @@ def FCFS(data, tcs):
                         print("]")
             elif actions[i][1][0] == "io":
                 current = actions[i][0]
+                turnaround[current][burstdone[current]] = time - turnaround[current][burstdone[current]] + 4
                 burstleft[current] -= 1
                 burstdone[current] += 1
                 content_switch = time + tcs/2
                 if burstleft[current] == 0:
-                    turnaround[current][burstdone[current]-1] = time - turnaround[current][burstdone[current]-1] + 4
+                    runtime[current] = time - runtime[current]
+                    print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                    finish += 1
+                else:
+                    nextaction[current] = ("ready", int(time + data[current][burstdone[current]-1][1] + tcs/2))
+                    if time <= 999:
+                        print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
+                              .format(time, processlist[current], burstleft[actions[i][0]]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                        print("time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms [Q "
+                              .format(time, processlist[current], nextaction[current][1]), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                using = 0
+            elif actions[i][1][0] == "ready":
+                current = actions[i][0]
+                wait[current][burstdone[current]] = time
+                queue.append(processlist[actions[i][0]])
+                if time <= 999:
+                    print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+        if len(queue) > 0 and using == 0:
+            current = processlist.index(queue[0])
+            using = 1
+            if first_process == 1:
+                nextaction[current] = ("cpu", time + tcs/2)
+                first_process = 0
+                cts += 1
+            elif time <= content_switch:
+                nextaction[current] = ("cpu", content_switch + tcs/2)
+                cts += 1
+            else:
+                nextaction[current] = ("cpu", time + tcs/2)
+                cts += 1
+        time += 1
+    print("time {}ms: Simulator ended for FCFS [Q <empty>]".format(time+1))
+    sum1 = 0
+    sum2 = 0
+    for i in range(len(turnaround)):
+        for j in range(len(turnaround[i])):
+            sum1 += turnaround[i][j]
+            sum2 += wait[i][j]
+    avgtrn = sum1 / burstcount
+    avgwait = sum2 / burstcount
+    result = [avgburst, avgwait, avgtrn, cts, prmpt]
+    return result
+
+
+'''
+Simulates Round-Robin modal in CPU scheduling. 
+param: list data, t, bne, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...],
+ t = time slice, bne = beginning or end of the sequence
+effects: none
+returns: none
+Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
+        If 0 is given for bne, the default is END.
+'''
+
+
+def RR(data, tcs, t_slice, bne="END"):
+    if bne == "BEGINNING":
+        bne = False
+    else:
+        bne = True
+    print("time 0ms: Simulator started for RR [Q <empty>]")
+    cts = 0
+    prmpt = 0
+    queue = []
+    nextaction = []
+    burstleft = []
+    burstdone = []
+    turnaround = []
+    wait = []
+    timeleft = []
+    using = 0
+    first_process = 1
+    avgburst = 0
+    runtime = []
+    burstcount = 0
+    content_switch = 0
+    for i in range(len(data)):
+        nextaction.append(("arrive", data[i]["arrival"]))
+        burstleft.append(len(data[i]) - 1)
+        burstdone.append(0)
+        timeleft.append(0)
+        turnaround.append([])
+        wait.append([])
+        runtime.append(data[i]["arrival"])
+        sum = 0
+        for j in range(len(data[i]) - 1):
+            turnaround[i].append(0)
+            wait[i].append(0)
+            sum += data[i][j][0]
+        avgburst += float(sum / (len(data[i]) - 1))
+    avgburst = avgburst / len(data)
+    finish = 0
+    time = 0
+    while finish < len(data):
+        actions = []
+        for i in range(len(data)):
+            if time == nextaction[i][1]:
+                actions.append((i, nextaction[i]))
+        for i in range(len(actions)):
+            if actions[i][1][0] == "arrive":
+                current = actions[i][0]
+                queue.append(processlist[current])
+                wait[current][burstdone[current]] = time
+                if time <= 999:
+                    print("time {}ms: Process {} arrived; added to ready queue [Q {}"
+                          .format(time, processlist[actions[i][0]], queue[0]), end="")
+                    for j in range(1, len(queue)):
+                        print("", queue[j], end="")
+                    print("]")
+            elif actions[i][1][0] == "cpu":
+                burstcount += 1
+                current = actions[i][0]
+                queue.pop(0)
+                wait[current][burstdone[current]] = time - wait[current][burstdone[current]] - 2
+                turnaround[current][burstdone[current]] = time
+                if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
+                    nextaction[current] = ("expire", time + t_slice)
+                    timeleft[current] = data[current][burstdone[current]][0] - t_slice
+                else:
+                    nextaction[current] = ("io", time + data[current][burstdone[current]][0])
+                    timeleft[current] = 0
+                if time <= 999:
+                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
+                          .format(time, processlist[current], data[current][burstdone[current]][0]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+            elif actions[i][1][0] == "io":
+                current = actions[i][0]
+                turnaround[current][burstdone[current]] = time - turnaround[current][burstdone[current]] + 4
+                burstleft[current] -= 1
+                burstdone[current] += 1
+                content_switch = time + tcs/2
+                if burstleft[current] == 0:
                     runtime[current] = time - runtime[current]
                     print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
                     if len(queue) == 0:
@@ -117,40 +286,87 @@ def FCFS(data, tcs):
             elif actions[i][1][0] == "ready":
                 current = actions[i][0]
                 queue.append(processlist[actions[i][0]])
-                turnaround[current][burstdone[current]-1] = time - turnaround[current][burstdone[current]-1] + 4
+                wait[current][burstdone[current]] = time
                 if time <= 999:
                     print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
                           .format(time, processlist[actions[i][0]], queue[0]), end="")
                     for j in range(1, len(queue)):
                         print("", queue[j], end="")
                     print("]")
+            elif actions[i][1][0] == "expire":
+                content_switch = time + tcs / 2
+                current = actions[i][0]
+                wait[current][burstdone[current]] = time
+                if timeleft[current] == 0:
+                    tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
+                    timeleft[actions[i][0]] = tleft
+                else:
+                    tleft = timeleft[current]
+                nextaction[current] = ("continue", tleft)
+                if time <= 999:
+                    print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
+                          .format(time, processlist[actions[i][0]], tleft), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                if bne:
+                    queue.append(processlist[actions[i][0]])
+                else:
+                    queue.insert(0, processlist[actions[i][0]])
+                prmpt += 1
+                using = 0
+            elif actions[i][1][0] == "continue":
+                burstcount += 1
+                current = actions[i][0]
+                queue.pop(0)
+                wait[current][burstdone[current]] = time - wait[current][burstdone[current]] - 2
+                if time <= 999:
+                    print("time {}ms: Process {} started using the CPU with {}ms burst remaining [Q "
+                          .format(time, processlist[current], timeleft[current]), end="")
+                    if len(queue) == 0:
+                        print("<empty>]")
+                    else:
+                        print(queue[0], end="")
+                        for j in range(1, len(queue)):
+                            print("", queue[j], end="")
+                        print("]")
+                if timeleft[current] > t_slice and finish != len(data) - 1:
+                    nextaction[current] = ("expire", time + t_slice)
+                    timeleft[current] -= t_slice
+                else:
+                    nextaction[current] = ("io", time + timeleft[current])
+                    timeleft[current] = 0
         if len(queue) > 0 and using == 0:
             current = processlist.index(queue[0])
             using = 1
-            if first_process == 1:
-                nextaction[current] = ("cpu", time + tcs/2)
-                first_process = 0
-                cts += 1
-            elif time <= content_switch:
-                nextaction[current] = ("cpu", content_switch + tcs/2)
-                cts += 1
+            cts += 1
+            if nextaction[current][0] == "continue":
+                if time <= content_switch:
+                    nextaction[current] = ("continue", content_switch + tcs / 2)
+                else:
+                    nextaction[current] = ("continue", time + tcs / 2)
             else:
-                nextaction[current] = ("cpu", time + tcs/2)
-                cts += 1
+                if first_process == 1:
+                    nextaction[current] = ("cpu", time + tcs / 2)
+                    first_process = 0
+                elif time <= content_switch:
+                    nextaction[current] = ("cpu", content_switch + tcs / 2)
+                else:
+                    nextaction[current] = ("cpu", time + tcs / 2)
         time += 1
-    print("time {}ms: Simulator ended for FCFS [Q <empty>]".format(time+1))
-    sum = 0
+    print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
+    sum1 = 0
+    sum2 = 0
     for i in range(len(turnaround)):
         for j in range(len(turnaround[i])):
-            sum += turnaround[i][j]
-    avgtrn = sum / burstcount
-    avgwait = 0
-    for i in range(len(turnaround)):
-        sum = 0
-        for j in range(len(turnaround[i])):
-            sum += turnaround[i][j]
-        avgwait += runtime[i] - sum
-    avgwait = avgwait / burstcount
+            sum1 += turnaround[i][j]
+            sum2 += wait[i][j]
+    avgtrn = sum1 / burstcount
+    avgwait = sum2 / burstcount
     result = [avgburst, avgwait, avgtrn, cts, prmpt]
     return result
 
@@ -819,214 +1035,4 @@ def SRT(data, alpha,lmda,switcht, processlist):
     # print("-- total number of context switches:",swchc)
     # print("-- total number of preemptions:", preec)
     return ttcpu / ccpu, waitt / waitc, ttt / bursc, swchc,preec
-
-
-'''
-Simulates Round-Robin modal in CPU scheduling. 
-param: list data, t, bne, data = [{arrival: t, 0:[cput, iot], 1:[cput, iot],...}...],
- t = time slice, bne = beginning or end of the sequence
-effects: none
-returns: none
-Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
-        If 0 is given for bne, the default is END.
-'''
-
-
-def RR(data, tcs, t_slice, bne="END"):
-    if bne == "BEGINNING":
-        bne = False
-    else:
-        bne = True
-    print("time 0ms: Simulator started for RR [Q <empty>]")
-    cts = 0
-    prmpt = 0
-    queue = []
-    nextaction = []
-    burstleft = []
-    burstdone = []
-    turnaround = []
-    using = 0
-    timeleft = []
-    first_process = 1
-    avgburst = 0
-    runtime = []
-    burstcount = 0
-    content_switch = 0
-    for i in range(len(data)):
-        nextaction.append(("arrive", data[i]["arrival"]))
-        burstleft.append(len(data[i]) - 1)
-        burstdone.append(0)
-        timeleft.append(0)
-        turnaround.append([])
-        runtime.append(data[i]["arrival"])
-        sum = 0
-        for j in range(len(data[i]) - 1):
-            turnaround[i].append(0)
-            sum += data[i][j][0]
-        avgburst += float(sum / (len(data[i]) - 1))
-    avgburst = avgburst / len(data)
-    finish = 0
-    time = 0
-    while finish < len(data):
-        actions = []
-        for i in range(len(data)):
-            if time == nextaction[i][1]:
-                actions.append((i, nextaction[i]))
-        for i in range(len(actions)):
-            if actions[i][1][0] == "arrive":
-                queue.append(processlist[actions[i][0]])
-                if time <= 999:
-                    print("time {}ms: Process {} arrived; added to ready queue [Q {}"
-                          .format(time, processlist[actions[i][0]], queue[0]), end="")
-                    for j in range(1, len(queue)):
-                        print("", queue[j], end="")
-                    print("]")
-            elif actions[i][1][0] == "cpu":
-                burstcount += 1
-                current = actions[i][0]
-                queue.pop(0)
-                turnaround[current][burstdone[current]] = time
-                if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
-                    nextaction[current] = ("expire", time + t_slice)
-                    timeleft[current] = data[current][burstdone[current]][0] - t_slice
-                else:
-                    nextaction[current] = ("io", time + data[current][burstdone[current]][0])
-                    timeleft[current] = 0
-                if time <= 999:
-                    print("time {}ms: Process {} started using the CPU for {}ms burst [Q "
-                          .format(time, processlist[current], data[current][burstdone[current]][0]), end="")
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-            elif actions[i][1][0] == "io":
-                current = actions[i][0]
-                burstleft[current] -= 1
-                burstdone[current] += 1
-                content_switch = time + tcs/2
-                if burstleft[current] == 0:
-                    runtime[current] = time - runtime[current]
-                    turnaround[current][burstdone[current] - 1] = time - turnaround[current][burstdone[current] - 1] + 4
-                    print("time {}ms: Process {} terminated [Q ".format(time, processlist[current]), end="")
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-                    finish += 1
-                else:
-                    nextaction[current] = ("ready", int(time + data[current][burstdone[current]-1][1] + tcs/2))
-                    if time <= 999:
-                        print("time {}ms: Process {} completed a CPU burst; {} bursts to go [Q "
-                              .format(time, processlist[current], burstleft[actions[i][0]]), end="")
-                        if len(queue) == 0:
-                            print("<empty>]")
-                        else:
-                            print(queue[0], end="")
-                            for j in range(1, len(queue)):
-                                print("", queue[j], end="")
-                            print("]")
-                        print("time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms [Q "
-                              .format(time, processlist[current], nextaction[current][1]), end="")
-                        if len(queue) == 0:
-                            print("<empty>]")
-                        else:
-                            print(queue[0], end="")
-                            for j in range(1, len(queue)):
-                                print("", queue[j], end="")
-                            print("]")
-                using = 0
-            elif actions[i][1][0] == "ready":
-                current = actions[i][0]
-                queue.append(processlist[actions[i][0]])
-                turnaround[current][burstdone[current] - 1] = time - turnaround[current][burstdone[current] - 1] + 4
-                if time <= 999:
-                    print("time {}ms: Process {} completed I/O; added to ready queue [Q {}"
-                          .format(time, processlist[actions[i][0]], queue[0]), end="")
-                    for j in range(1, len(queue)):
-                        print("", queue[j], end="")
-                    print("]")
-            elif actions[i][1][0] == "expire":
-                content_switch = time + tcs / 2
-                current = actions[i][0]
-                if timeleft[current] == 0:
-                    tleft = data[actions[i][0]][burstdone[actions[i][0]]][0] - t_slice
-                    timeleft[actions[i][0]] = tleft
-                else:
-                    tleft = timeleft[current]
-                nextaction[current] = ("continue", tleft)
-                if time <= 999:
-                    print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
-                          .format(time, processlist[actions[i][0]], tleft), end="")
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-                if bne:
-                    queue.append(processlist[actions[i][0]])
-                else:
-                    queue.insert(0, processlist[actions[i][0]])
-                prmpt += 1
-                using = 0
-            elif actions[i][1][0] == "continue":
-                burstcount += 1
-                current = actions[i][0]
-                queue.pop(0)
-                if time <= 999:
-                    print("time {}ms: Process {} started using the CPU with {}ms burst remaining [Q "
-                          .format(time, processlist[current], timeleft[current]), end="")
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-                if timeleft[current] > t_slice and finish != len(data) - 1:
-                    nextaction[current] = ("expire", time + t_slice)
-                    timeleft[current] -= t_slice
-                else:
-                    nextaction[current] = ("io", time + timeleft[current])
-                    timeleft[current] = 0
-        if len(queue) > 0 and using == 0:
-            current = processlist.index(queue[0])
-            using = 1
-            if nextaction[current][0] == "continue":
-                nextaction[current] = ("continue", time + tcs)
-                cts += 1
-            else:
-                if first_process == 1:
-                    nextaction[current] = ("cpu", time + tcs / 2)
-                    first_process = 0
-                elif time <= content_switch:
-                    nextaction[current] = ("cpu", content_switch + tcs / 2)
-                    cts += 1
-                else:
-                    nextaction[current] = ("cpu", time + tcs / 2)
-                    cts += 1
-        time += 1
-    print("time {}ms: Simulator ended for RR [Q <empty>]".format(time + 1))
-    sum = 0
-    for i in range(len(turnaround)):
-        for j in range(len(turnaround[i])):
-            sum += turnaround[i][j]
-    avgtrn = sum / (cts-prmpt)
-    avgwait = 0
-    for i in range(len(turnaround)):
-        sum = 0
-        for j in range(len(turnaround[i])):
-            sum += turnaround[i][j]
-        avgwait += runtime[i] - sum
-    avgwait = avgwait / burstcount
-    result = [avgburst, avgwait, avgtrn, cts, prmpt]
-    return result
-
 
