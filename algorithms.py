@@ -476,7 +476,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                 elif stat[i][0] == 3:  # finished running, to next
                     running = -2
                     # stat[i][4] = t * alpha + (1 - alpha) * stat[i][4]
-                    print(stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0])
+                    # print(stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0])
                     tptau = stat[i][3] * alpha + (1 - alpha) * data[i][stat[i][2]][0]
                     tptau = math.ceil(tptau)
                     if tmln < 1000:
