@@ -1,4 +1,3 @@
-import sys
 import math
 from queue import PriorityQueue
 # from p1 import handleTies
@@ -9,6 +8,11 @@ class Board:
     norbuff = 0
     preems = []
     rdn = 1000
+    preempyyy = 0.0
+    switches = 0.0
+    wait = 0.0
+    waitc = 0.0
+    waitq = dict()
     def __init__(self, switcht, alpha, process, data ):
         self.cpu = [0,0,0]#stat,time,proc
         self.pcb = [0,0,0,0,0,0]#stat,time,proc1,proc2,to,come
@@ -21,6 +25,8 @@ class Board:
 
     def gt(self):
         return self.time+1
+
+
 
     def trycpu(self, proc):#not finished
         if self.cpu[0] == 0 and self.pcb[0] == 0 and len(self.readyq.queue) != 0:
@@ -64,7 +70,7 @@ class Board:
                 print('time {}ms: Recalculated tau = {}ms for process {} '.format(self.gt(),self.cpu[2].gettau(),self.cpu[2].getna()), end='')
                 self.rdqprint()
                 print('time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms '.format(self.gt(),
-                                                                                  self.cpu[2].getna(), self.cpu[2].getiot()+self.switcht/2+self.gt()), end='')
+                                                                                  self.cpu[2].getna(), int(self.cpu[2].getiot()+self.switcht/2+self.gt())), end='')
                 self.rdqprint()
             if len(self.readyq.queue) != 0:
                 if self.trycpu(self.rdqsee()):
@@ -88,7 +94,14 @@ class Board:
             # print('pcb',self.pcb)
             self.pcb[1] -= 1
             self.pcb[1] = int(self.pcb[1])
+        for key in self.waitq:
+            # print('dict,', key, self.waitq[key])
+            self.waitq[key] += 1
+
         self.time += 1
+
+    def getreturn(self):
+        return self.wait/self.waitc , self.switches, self.preempyyy
 
     def upio(self):
         tmp = []
@@ -132,12 +145,21 @@ class Board:
         #         return
         #     elif not proc in list(self.readyq.queue):
         #         proc.tord()
+        #         self.waitc = self.waitc + 1.0
+        #         self.waitq[proc.getna()] = 0
+        #
         #         self.readyq.put((proc.gettau(), proc.getnum()))
         # elif not proc in list(self.readyq.queue):
         #     proc.tord()
+        self.waitc = self.waitc + 1.0
+        self.waitq[proc.getna()] = 0
+        self.wait += self.waitq[proc.getna()]
+        # print('aa',self.wait)
         self.readyq.put((proc.gettau(),proc.getnum()))
 
     def rdqget(self):
+        # print( self.process[self.rdqsee()[1]])
+        self.wait += self.waitq[self.process[self.rdqsee()[1]]]
         return self.readyq.get()
 
     def rdqsee(self):
@@ -212,7 +234,7 @@ class Board:
     def uppcb(self):#updates pcb proccesses
         if self.pcb[0] == 1:
             if self.pcb[1] == 0:
-
+                self.switches = self.switches + 1.0
                 if self.pcb[4] == 'io':
                     self.cpu[0] = 0
                     self.pcb[2].setrem(0)
@@ -225,14 +247,16 @@ class Board:
                     self.cpu[1] = self.pcb[2].tocpu()
                     self.cpu[2] = self.pcb[2]
                     if self.time < self.rdn:
-                        print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst '.format(self.gt(),self.cpu[2].getna(),self.cpu[2].gettau(),self.cpu[1]),end='')
+                        print('time {}ms: Process {} (tau {}ms) started using the CPU with {}ms burst remaining '.format(self.gt(),self.cpu[2].getna(),self.cpu[2].gettau(),self.cpu[1]),end='')
                         self.rdqprint()
                     # self.rdqget()
                     self.pcb[0] = 0
                     if len(self.preems) != 0:
                         b = self.preems[0]
                         if self.time < self.rdn:
+
                             print("time {}ms: Process {} (tau {}ms) completed I/O; will preempt {} ".format(self.time+1, b.getna(), b.gettau(),self.cpu[2].getna()))
+                        self.preempyyy += 1
                         self.pcbrdcpu(b)
                         del self.preems[0]
                     # if (self.pcb[0] == 1 and self.pcb[2].getstat() == "cua"):
@@ -244,6 +268,8 @@ class Board:
                     self.rdqadd(self.pcb[2])
                     self.pcb[0] = 0
         elif self.pcb[0] == 2:
+
+            self.switches = self.switches + 1.0
             if self.pcb[1] == self.switcht /2:
                 if self.pcb[4] == 'io':
                     self.pcb[2].setrem(0)
@@ -277,7 +303,7 @@ class Board:
                     self.cpu[2] = self.pcb[3]
                     self.pcb[0] = 0
                     if self.time < self.rdn:
-                        print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst '.format(
+                        print('time {}ms: Process {} (tau {}ms) started using the CPU with {}ms burst remaining'.format(
                             self.gt(), self.cpu[2].getna(), self.cpu[2].gettau(), self.cpu[1]), end='')
                         self.rdqprint()
 
@@ -306,6 +332,7 @@ class Board:
                     self.pcbrdcpu(b)
                     if self.time < self.rdn:
                         print("time {}ms: Process {} (tau {}ms) completed I/O; preempting {} ".format(self.time+1, b.getna(), b.gettau(),a.getna()))
+                    self.preempyyy += 1
                     return True
             elif self.pcb[4] == 'cpu' and a.gett() < 0:
                 if b.getstat() == 'rd':
@@ -318,7 +345,9 @@ class Board:
             if a.getstat() == 'cpu' and a.gett() >= 0:
                 if b.stat() == 'rd':
                     self.pcbrdcpu(b)
+                    self.preemp += 1
                     if self.time < self.rdn:
+
                         print("time {}ms: Process {} (tau {}ms) completed I/O; preempting {} ".format(self.time+1,
                                                                                                       b.getna(),
                                                                                                       b.gettau(),
@@ -462,7 +491,7 @@ class Proc:
             self.time -= 1
         return self.time
 
-def SJF2(data, alpha,lmda,switcht, processlist,cal):
+def SJF2(data, alpha,lmda,switcht, processlist, cal):
 
     procs = []
     finishedprocs = []
@@ -529,3 +558,12 @@ def SJF2(data, alpha,lmda,switcht, processlist,cal):
         #     print("debug",mbd.gt())
         #     break
     print("time {}ms: Simulator ended for SJF [Q <empty>]".format(mbd.gt()+2))
+    tmpa = mbd.getreturn()
+    bursts = 0
+    avgsw = mbd.wait/mbd.waitc
+    for i in procs:
+        bursts += (len(i.burs)-1)
+    # print(tmpa[2])
+    avgtrn = cal + avgsw
+    avgtrn +=  switcht/2 * tmpa[2]/bursts
+    return cal,tmpa[0],avgtrn,tmpa[1],tmpa[2]

@@ -71,7 +71,7 @@ class Board:
                 print('time {}ms: Recalculated tau = {}ms for process {} '.format(self.gt(),self.cpu[2].gettau(),self.cpu[2].getna()), end='')
                 self.rdqprint()
                 print('time {}ms: Process {} switching out of CPU; will block on I/O until time {}ms '.format(self.gt(),
-                                                                                  self.cpu[2].getna(), self.cpu[2].getiot()+self.switcht/2+self.gt()), end='')
+                                                                                  self.cpu[2].getna(), int(self.cpu[2].getiot()+self.switcht/2+self.gt())), end='')
                 self.rdqprint()
             if len(self.readyq.queue) != 0:
                 if self.trycpu(self.rdqsee()):
@@ -248,7 +248,7 @@ class Board:
                     self.cpu[1] = self.pcb[2].tocpu()
                     self.cpu[2] = self.pcb[2]
                     if self.time < self.rdn:
-                        print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst '.format(self.gt(),self.cpu[2].getna(),self.cpu[2].gettau(),self.cpu[1]),end='')
+                        print('time {}ms: Process {} (tau {}ms) started using the CPU with {}ms burst remaining '.format(self.gt(),self.cpu[2].getna(),self.cpu[2].gettau(),self.cpu[1]),end='')
                         self.rdqprint()
                     # self.rdqget()
                     self.pcb[0] = 0
@@ -256,7 +256,8 @@ class Board:
                         b = self.preems[0]
                         if self.time < self.rdn:
 
-                            print("time {}ms: Process {} (tau {}ms) completed I/O; will preempt {} ".format(self.time+1, b.getna(), b.gettau(),self.cpu[2].getna()))
+                            print("time {}ms: Process {} (tau {}ms) will preempt {} ".format(self.time+1, b.getna(), b.gettau(),self.cpu[2].getna()))
+                            self.rdqprint()
                         self.preempyyy += 1
                         self.pcbrdcpu(b)
                         del self.preems[0]
@@ -304,7 +305,7 @@ class Board:
                     self.cpu[2] = self.pcb[3]
                     self.pcb[0] = 0
                     if self.time < self.rdn:
-                        print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst '.format(
+                        print('time {}ms: Process {} (tau {}ms) started using the CPU with {}ms burst remaining '.format(
                             self.gt(), self.cpu[2].getna(), self.cpu[2].gettau(), self.cpu[1]), end='')
                         self.rdqprint()
 
