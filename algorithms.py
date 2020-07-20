@@ -281,8 +281,9 @@ def RR(data, tcs, t_slice, bne):
                 else:
                     tleft = int(timeleft[current])
                 if len(queue) == 0:
-                    print("time {}ms: Time slice expired; no preemption because ready queue is empty [Q <empty>]"
-                          .format(time))
+                    if time <= 999:
+                        print("time {}ms: Time slice expired; no preemption because ready queue is empty [Q <empty>]"
+                              .format(time))
                     nextaction[current] = ("io", time + tleft)
                 else:
                     nextaction[current] = ("add", int(time + tcs/2))
