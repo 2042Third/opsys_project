@@ -158,7 +158,6 @@ Note: Assuming data[0] is process 'A', and data[1] is process 'B', and so on.
 
 
 def RR(data, tcs, t_slice, bne):
-    print(bne)
     if bne == "BEGINNING":
         bne = False
     else:
