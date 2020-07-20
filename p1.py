@@ -209,6 +209,7 @@ if __name__ == '__main__':
     f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
     f.write("-- total number of context switches: {}\n".format(result[3]))
     f.write("-- total number of preemptions: {}\n".format(result[4]))
+
     print()
     # print_new(process)
     # f.write("Algorithm RR\n")

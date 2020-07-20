@@ -50,6 +50,11 @@ def FCFS(data, tcs):
         for i in range(len(data)):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
+        for j in range(len(actions)):
+            for i in range(len(actions) - 1):
+                if actions[i][1][0] != "cpu" and actions[i+1][1][0] == "cpu":
+                    temp = actions.pop(i)
+                    actions.append(temp)
         for i in range(len(actions)):
             current = actions[i][0]
             if actions[i][1][0] == "arrive":
@@ -210,7 +215,7 @@ def RR(data, tcs, t_slice, bne):
             elif actions[i][1][0] == "cpu":
                 burstcount += 1
                 wait[current][-1] = time - wait[current][-1] - tcs/2
-                if data[current][burstdone[current]][0] > t_slice and finish != len(data) - 1:
+                if data[current][burstdone[current]][0] > t_slice:
                     nextaction[current] = ("expire", time + t_slice)
                     timeleft[current] = int(data[current][burstdone[current]][0] - t_slice)
                 else:
@@ -280,19 +285,25 @@ def RR(data, tcs, t_slice, bne):
                     timeleft[actions[i][0]] = tleft
                 else:
                     tleft = int(timeleft[current])
-                nextaction[current] = ("add", int(time + tcs/2))
-                if time <= 999:
-                    print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
-                          .format(time, processlist[actions[i][0]], tleft), end="")
-                    if len(queue) == 0:
-                        print("<empty>]")
-                    else:
-                        print(queue[0], end="")
-                        for j in range(1, len(queue)):
-                            print("", queue[j], end="")
-                        print("]")
-                prmpt += 1
-                using = 0
+                if len(queue) == 0:
+                    if time <= 999:
+                        print("time {}ms: Time slice expired; no preemption because ready queue is empty [Q <empty>]"
+                              .format(time))
+                    nextaction[current] = ("io", time + tleft)
+                else:
+                    nextaction[current] = ("add", int(time + tcs/2))
+                    if time <= 999:
+                        print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
+                              .format(time, processlist[actions[i][0]], tleft), end="")
+                        if len(queue) == 0:
+                            print("<empty>]")
+                        else:
+                            print(queue[0], end="")
+                            for j in range(1, len(queue)):
+                                print("", queue[j], end="")
+                            print("]")
+                    prmpt += 1
+                    using = 0
             elif actions[i][1][0] == "continue":
                 burstcount += 1
                 wait[current][-1] = time - wait[current][-1] - tcs/2
