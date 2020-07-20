@@ -1,6 +1,5 @@
 import sys
 import math
-from queue import PriorityQueue
 # from p1 import handleTies
 
 class Board:
