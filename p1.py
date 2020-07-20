@@ -3,6 +3,7 @@ import math
 from queue import PriorityQueue
 from math import exp, expm1
 from algorithms import *
+from algo import *
 
 # def srand48(seed):
 #     global x
@@ -160,20 +161,20 @@ if __name__ == '__main__':
     processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     # get all the cmd/parameters
-    n = int(sys.argv[1])
-    seed = int(sys.argv[2])
-    lmda = float(sys.argv[3])
-    upperbound = int(sys.argv[4])
-    t_cs  = int(sys.argv[5])
-    alpha = float(sys.argv[6])
-    t_slice = float(sys.argv[7])
-    # n = 2
-    # seed = 2
-    # lmda = 0.01
-    # upperbound = 256
-    # t_cs = 4
-    # alpha = 0.5
-    # t_slice = 128
+    # n = int(sys.argv[1])
+    # seed = int(sys.argv[2])
+    # lmda = float(sys.argv[3])
+    # upperbound = int(sys.argv[4])
+    # t_cs  = int(sys.argv[5])
+    # alpha = float(sys.argv[6])
+    # t_slice = float(sys.argv[7])
+    n = 2
+    seed = 2
+    lmda = 0.01
+    upperbound = 256
+    t_cs = 4
+    alpha = 0.5
+    t_slice = 128
     bne = 'END'
     rand = Rand48(seed)
     switcht = 0
@@ -188,35 +189,35 @@ if __name__ == '__main__':
     bne = 0
 
     f = open("simout.txt", "w")
-    f.write("Algorithm FCFS\n")
-    print_new(process)
-    result = FCFS(process, t_cs)
-    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
-    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
-    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
-    f.write("-- total number of context switches: {}\n".format(result[3]))
-    f.write("-- total number of preemptions: {}\n".format(result[4]))
+    # f.write("Algorithm FCFS\n")
+    # print_new(process)
+    # result = FCFS(process, t_cs)
+    # f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    # f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    # f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    # f.write("-- total number of context switches: {}\n".format(result[3]))
+    # f.write("-- total number of preemptions: {}\n".format(result[4]))
 
-    f.write("Algorithm SJF\n")
-    result = SJF(process, alpha, lmda, switcht, processlist)
-    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
-    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
-    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
-    f.write("-- total number of context switches: {}\n".format(result[3]))
-    f.write("-- total number of preemptions: {}\n".format(result[4]))
-    f.write("Algorithm SRT\n")
-    result = SRT(process, alpha, lmda, switcht, processlist)
-    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
-    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
-    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
-    f.write("-- total number of context switches: {}\n".format(result[3]))
-    f.write("-- total number of preemptions: {}\n".format(result[4]))
-    print_new(process)
-    f.write("Algorithm RR\n")
-    result = RR(process, t_cs, t_slice, bne)
-    f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
-    f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
-    f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
-    f.write("-- total number of context switches: {}\n".format(result[3]))
-    f.write("-- total number of preemptions: {}\n".format(result[4]))
+    # f.write("Algorithm SJF\n")
+    # result = SJF(process, alpha, lmda, switcht, processlist)
+    # f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    # f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    # f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    # f.write("-- total number of context switches: {}\n".format(result[3]))
+    # f.write("-- total number of preemptions: {}\n".format(result[4]))
+    # f.write("Algorithm SRT\n")
+    result = SRT2(process, alpha, lmda, switcht, processlist)
+    # f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    # f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    # f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    # f.write("-- total number of context switches: {}\n".format(result[3]))
+    # f.write("-- total number of preemptions: {}\n".format(result[4]))
+    # print_new(process)
+    # f.write("Algorithm RR\n")
+    # result = RR(process, t_cs, t_slice, bne)
+    # f.write("-- average CPU burst time: {:.3f} ms\n".format(result[0]))
+    # f.write("-- average wait time: {:.3f} ms\n".format(result[1]))
+    # f.write("-- average turnaround time: {:.3f} ms\n".format(result[2]))
+    # f.write("-- total number of context switches: {}\n".format(result[3]))
+    # f.write("-- total number of preemptions: {}\n".format(result[4]))
 

@@ -450,7 +450,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     readyq.put((tau, i))
                     if tmln < 1000:
                         print('time {}ms: Process {} (tau {}ms) arrived; added to ready queue '.format(tmln, processlist[i],
-                                                                                                       stat[i][3]),
+                                                                                                       int(stat[i][3])),
                               end='')
                         print_q(i, tmln, readyq)
                     if swchnum == -1:  # first CPU use
@@ -469,7 +469,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     stat[i] = (2, -1, tp[2] + 1, tp[3])
                     readyq.put((stat[i][3], i))
                     if tmln < 1000:
-                        print("time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln,processlist[i],stat[i][3]),end='')
+                        print("time {}ms: Process {} (tau {}ms) completed I/O;".format(tmln,processlist[i],int(stat[i][3])),end='')
                         print('added to ready queue ',end='')
                         print_q(i, tmln, readyq)
 
@@ -482,7 +482,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                     if tmln < 1000:
                         print(
                             'time {}ms: Process {} (tau {}ms) completed a CPU burst;'.format(tmln, processlist[i],
-                                                                                             stat[i][3]),
+                                                                                             int(stat[i][3])),
                             end='')
                         print(' {} bursts to go '.format(len(data[i])-stat[i][2]-2), end='')
                         print_q(i, tmln, readyq)
@@ -585,7 +585,7 @@ def SJF(data, alpha,lmda,switcht, processlist):
                             stat[i] = (3, remain[i], tp[2], tp[3])
                         running = i
                         if tmln < 1000:
-                            print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst'.format(tmln, processlist[i],stat[i][3],
+                            print('time {}ms: Process {} (tau {}ms) started using the CPU for {}ms burst'.format(tmln, processlist[i],int(stat[i][3]),
                                                                                                       stat[i][1]), end='')
                             print_q(i, tmln, readyq)
                     else:  # from switch to queue or io
