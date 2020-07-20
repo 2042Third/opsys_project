@@ -50,6 +50,11 @@ def FCFS(data, tcs):
         for i in range(len(data)):
             if time == nextaction[i][1]:
                 actions.append((i, nextaction[i]))
+        for j in range(len(actions)):
+            for i in range(len(actions) - 1):
+                if actions[i][1][0] != "cpu" and actions[i+1][1][0] == "cpu":
+                    temp = actions.pop(i)
+                    actions.append(temp)
         for i in range(len(actions)):
             current = actions[i][0]
             if actions[i][1][0] == "arrive":
