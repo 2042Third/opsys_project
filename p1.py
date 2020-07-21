@@ -114,8 +114,12 @@ def print_new(process):
     processlist = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
     for i in range(len(process)):
-        print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
-              "ms)", len(process[i].keys()) - 1, "CPU bursts")
+        if len(process[i].keys()) - 1 == 1:
+            print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
+                  "ms)", len(process[i].keys()) - 1, "CPU bursts")
+        else:
+            print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
+                  "ms)", len(process[i].keys()) - 1, "CPU bursts")
 
 
 '''
@@ -166,8 +170,8 @@ if __name__ == '__main__':
     t_slice = float(sys.argv[7])
     if len(sys.argv) == 9:
         bne = sys.argv[8]
-    else:                  #p1.py 1 2 0.01 256 4 0.5 128
-        bne = "END" #p1.py 8 64 0.001 4096 4 0.5 2048     python p1.py 2 2 0.01 256 4 0.5 128   p1.py 16 2 0.01 256 4 0.75 64
+    else:
+        bne = "END"
 
     # n = 8
     # seed = 64
@@ -205,14 +209,6 @@ if __name__ == '__main__':
 
 
     # bne = 'END'
-
-
-
-
-
-
-
-
 
     rand = Rand48(seed)
     count = 0
