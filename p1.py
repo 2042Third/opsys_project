@@ -116,7 +116,7 @@ def print_new(process):
     for i in range(len(process)):
         if len(process[i].keys()) - 1 == 1:
             print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
-                  "ms)", len(process[i].keys()) - 1, "CPU bursts")
+                  "ms) 1 CPU burst")
         else:
             print("Process", processlist[i], "[NEW] (arrival time", process[i]["arrival"],
                   "ms)", len(process[i].keys()) - 1, "CPU bursts")
