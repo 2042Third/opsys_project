@@ -7,7 +7,7 @@ class Board:
     buff = 0
     norbuff = 0
     preems = []
-    rdn = 10000000000
+    rdn = 1000
     preempyyy = 0.0
     switches = 0.0
     wait = 0.0
@@ -67,7 +67,7 @@ class Board:
             if self.time < self.rdn and self.cpu[2].remburs()-3 == 1:
                 print('time {}ms: Process {} (tau {}ms) completed a CPU burst; {} burst to go '.format(self.gt(),self.cpu[2].getna(),self.cpu[2].gettau(), self.cpu[2].remburs()-3),end='')
                 self.rdqprint()
-            else:
+            elif self.time < self.rdn:
                 print('time {}ms: Process {} (tau {}ms) completed a CPU burst; {} bursts to go '.format(self.gt(),
                                                                                                        self.cpu[
                                                                                                            2].getna(),
@@ -464,27 +464,7 @@ class Board:
                     b.setcua()
                     self.nopreem = False
                     return 111
-        # elif anum == bnum and b.getna() < a.getna():
-        #     self.buff = b
-        #     if a.getstat() == 'cpu' and a.gett() >= 0:
-        #         if b.stat() == 'rd':
-        #             self.pcbrdcpu(b)
-        #             self.preempyyy += 1
-        #             self.nopreem = False
-        #             return True
-        #         elif self.pcb[4] == 'cpu' and a.gett() < 0 and self.pcb[2].getna() == a.getna():
-        #             # print(2)
-        #             if b.getstat() == 'rd':
-        #                 b.setcua()
-        #                 self.nopreem = False
-        #                 return 111
-        #         elif self.pcb[5] == 'cpu' and a.gett() < 0 and self.pcb[3].getna() == a.getna() and self.pcb[
-        #             1] <= self.switcht / 2:
-        #             # print(3)
-        #             if b.getstat() == 'rd':
-        #                 b.setcua()
-        #                 self.nopreem = False
-        #                 return 111
+
         return False
 
 class Proc:
@@ -638,10 +618,10 @@ def SRT2(data, alpha,lmda,switcht, processlist, cal):
         finishnum = 0
         mbd.upt()
         mbd.uppcb()
-        # mbd.upio()
+        mbd.upio()
         mbd.upcpu()
 
-        mbd.upio()
+        # mbd.upio()
         # print(mbd.readyq)
         # print('time {}ms: '.format(mbd.gt() ), end='')
         # mbd.rdqprint()

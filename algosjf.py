@@ -645,10 +645,10 @@ def SJF2(data, alpha,lmda,switcht, processlist, cal):
         finishnum = 0
         mbd.upt()
         mbd.uppcb()
-        # mbd.upio()
+        mbd.upio()
         mbd.upcpu()
 
-        mbd.upio()
+        # mbd.upio()
         # print(mbd.readyq)
         # print('time {}ms: '.format(mbd.gt() ), end='')
         # mbd.rdqprint()
