@@ -279,7 +279,6 @@ def RR(data, tcs, t_slice, bne):
                     print("]")
             elif actions[i][1][0] == "expire":
                 content_switch = time + tcs / 2
-                wait[current].append(time + tcs/2)
                 if timeleft[current] == 0:
                     tleft = int(data[current][burstdone[current]][0] - t_slice)
                     timeleft[actions[i][0]] = tleft
@@ -291,6 +290,7 @@ def RR(data, tcs, t_slice, bne):
                               .format(time))
                     nextaction[current] = ("io", time + tleft)
                 else:
+                    wait[current].append(time + tcs / 2)
                     nextaction[current] = ("add", int(time + tcs/2))
                     if time <= 999:
                         print("time {}ms: Time slice expired; process {} preempted with {}ms to go [Q "
@@ -353,6 +353,7 @@ def RR(data, tcs, t_slice, bne):
     for i in range(len(wait)):
         for j in range(len(wait[i])):
             sumwait += wait[i][j]
+    print(wait)
     avgwait = sumwait / bursts
     avgtrn = avgburst + avgwait + tcs + (tcs * prmpt / bursts)
     result = [avgburst, avgwait, avgtrn, cts, prmpt]
