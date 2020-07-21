@@ -7,7 +7,7 @@ class Board:
     buff = 0
     norbuff = 0
     preems = []
-    rdn = 5500000
+    rdn = 10000000000
     preempyyy = 0.0
     switches = 0.0
     wait = 0.0
@@ -120,14 +120,29 @@ class Board:
 
             if self.io[i].gt() == 0:
                 self.io[i].toio()
+                a = self.pcb[3]
+                b = self.io[i]
+                if self.pcb[1] == self.switcht / 2 and self.pcb[3].getna() == a.getna():
+                    anum = 0
+                    bnum = 0
+                    if a.getstat() == 'cpu':
+                        anum = (a.getcpt() - self.cpu[1])-1
+                    if b.getstat() == 'cpu' and b.getrem() != 0:
+                        bnum = (b.getcpt() - (b.getrem()))+1
+                    anum = a.gettau() - anum
+                    bnum = b.gettau() - bnum
+                    if anum > bnum or (anum == bnum and b.getna() < a.getna()):
+                        self.pcbcpu(b)
+                        self.rdqadd(a)
+
 
                 self.rdqadd(self.io[i])
-                tmp.append(i)
+                tmp.append(self.io[i])
 
             self.trycpu(self.io[i])
 
         for i in tmp:
-            del self.io[i]
+            self.io.remove(i)
 
 
 
@@ -203,7 +218,9 @@ class Board:
             # self.readyq.append((proc.gettau() - (proc.getcpt() - proc.getrem()), proc.getnum()))
             # self.readyq.append((proc.gettau()-proc.getrem(),proc.getnum()))
             if self.time < self.rdn:
-                print(' added to ready queue ',
+                print('time {}ms: Process {} (tau {}ms) completed I/O; added to ready queue '.format(self.time,
+                                                                                                     proc.getna(),
+                                                                                                     proc.gettau()),
                       end='')
                 self.rdqprint()
 
@@ -289,6 +306,8 @@ class Board:
                 self.switches = self.switches + 1.0
                 if self.pcb[4] == 'io':
                     # print("ge1t")
+
+
                     self.cpu[0] = 0
                     self.pcb[2].setrem(0)
                     self.pcb[2].toio()
@@ -309,7 +328,7 @@ class Board:
                         b = self.preems[0]
                         if self.time < self.rdn:
 
-                            print("time {}ms: Process {} (tau {}ms) will preempt {} ".format(self.time, b.getna(), b.gettau(),self.cpu[2].getna()))
+                            print("time {}ms: Process {} (tau {}ms) will preempt {} ".format(self.time, b.getna(), b.gettau(),self.cpu[2].getna()),end='')
                             self.rdqprint()
                         self.preempyyy += 1
                         self.pcbrdcpu(b)
@@ -325,9 +344,12 @@ class Board:
         elif self.pcb[0] == 2:
 
             self.switches = self.switches + 1.0
-            if self.pcb[1] == self.switcht /2:
+            if self.pcb[1] == self.switcht/2:
                 if self.pcb[4] == 'io':
                     # print("get")
+                    # self.rdqprint()
+
+
                     self.pcb[2].setrem(0)
                     self.pcb[2].toio()
                     self.io.append(self.pcb[2])
@@ -335,18 +357,9 @@ class Board:
                     if self.pcb[3].getna() != tp.getna():
                         self.pcb[3] = tp
 
-                # elif self.pcb[4] == 'cpu':
-                #     # self.rdqget()
-                #
-                #     self.pcb[2].setrem(0)
-                #     self.cpu[0] = 1
-                #     self.cpu[1] = self.pcb[2].tocpu()
-                #     self.cpu[2] = self.pcb[2]
-                #     print('time {}ms: Process {} (tau {}ms) started using the CPU with {}ms burst remaining '.format(
-                #         self.gt(), self.cpu[2].getna(), self.cpu[2].gettau(), self.cpu[1]), end='')
-                #     self.rdqprint()
-                elif self.pcb[4] == 'rd':
 
+                elif self.pcb[4] == 'rd':
+                    # print("get1")
                     self.pcb[2].tord()
                     tp = self.data[self.rdqget()[1]]
                     if self.pcb[3].getna() != tp.getna():
@@ -404,22 +417,22 @@ class Board:
 
 
     def preemp(self, a, b):#not finished
-        # print('this i s',a, b)
-
-
-
-
         anum = 0
         bnum = 0
         if a.getstat() == 'cpu' :
-            anum = (a.getcpt()  - self.cpu[1])
+            anum = (a.getcpt()  - self.cpu[1])+1
         if b.getstat() == 'cpu' and b.getrem() != 0:
             bnum = (b.getcpt() - ( b.getrem()))
+        # print(anum,bnum)
         anum =  a.gettau() - anum
         bnum = b.gettau() - bnum
-        print('if anum > bnum :',anum ,a.getstat(), bnum,a.getstat() )
-        a.debug()
-        b.debug()
+
+        # print('if anum > bnum :',anum ,a.getstat(), bnum,b.getstat() )
+        # a.debug()
+        # b.debug()
+        # self.rdqprint()
+        # print(not self.nopreem)
+
         if not self.nopreem:
             if self.pcb[1] == self.switcht / 2 and self.pcb[3].getna() == a.getna():
                 if anum > bnum or (anum == bnum and b.getna() < a.getna()):
@@ -489,7 +502,10 @@ class Proc:
         self.alpha = alpha
         self.time = arriv
         self.process = process
-        print("Process {} [NEW] (arrival time {} ms) {} CPU bursts (tau {}ms)".format(process[name], arriv-1, len(bursts)-1,self.tau))
+        if len(bursts)-1 == 1:
+            print("Process {} [NEW] (arrival time {} ms) {} CPU burst (tau {}ms)".format(process[name], arriv-1, len(bursts)-1,self.tau))
+        else:
+            print("Process {} [NEW] (arrival time {} ms) {} CPU bursts (tau {}ms)".format(process[name], arriv-1, len(bursts)-1,self.tau))
 
     def getself(self):
         return self
@@ -599,7 +615,8 @@ class Proc:
         return self.name
 
     def debug(self):
-        print('----------------------------------------------- name={} time={} stat={} tau={} rem={} bursc={} cpio={} '.format(self.getna(),self.gt(),self.getstat(),self.gettau(),self.remain,self.bursc,self.cpio))
+        print('----------------------------------------------- name={} time={} stat={} tau={} rem={} bursc={} cpio={} cpt{}'
+              .format(self.getna(),self.gt(),self.getstat(),self.gettau(),self.remain,self.bursc,self.cpio,self.getcpt()))
 
     def upt(self):
         if self.time != 0:
@@ -667,19 +684,19 @@ def SRT2(data, alpha,lmda,switcht, processlist, cal):
             # else:
             #     if mbd.trycpu(procs[i]):
             #         mbd.rdqget()
-        if mbd.gt() < 15000 and mbd.gt()>300:
-            print('+++++++++++++++++++++++++++++++++++++',mbd.gt(),'++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        # if mbd.gt() < 900 and mbd.gt()>100:
+        #     print('+++++++++++++++++++++++++++++++++++++',mbd.gt(),'++++',mbd.nopreem,'++++++++++++++++++++++++++++++++++++++')
+        #     mbd.rdqprint()
+        #     print('-----------------------------------------------cpu',mbd.cpu,mbd.cpu[2].getna())
+        #     print('-----------------------------------------------pcb',mbd.pcb, mbd.pcb[2].getna(),mbd.pcb[3].getna())
+        #     procs[0].debug()
+        #     procs[1].debug()
+        #     # procs[4].debug()
+        #     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
 
-            print('-----------------------------------------------cpu',mbd.cpu,mbd.cpu[2].getna())
-            print('-----------------------------------------------pcb',mbd.pcb, mbd.pcb[2].getna(),mbd.pcb[3].getna())
-            procs[7].debug()
-            procs[14].debug()
-            procs[15].debug()
-            print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-
-        if mbd.gt() > 20000:
-            print("debug",mbd.gt())
-            break
+        # if mbd.gt() > 50000:
+        #     print("debug",mbd.gt())
+        #     break
     print("time {}ms: Simulator ended for SRT [Q <empty>]".format(mbd.gt()+2))
     tmpa = mbd.getreturn()
     bursts = 0
