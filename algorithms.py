@@ -353,7 +353,6 @@ def RR(data, tcs, t_slice, bne):
     for i in range(len(wait)):
         for j in range(len(wait[i])):
             sumwait += wait[i][j]
-    print(wait)
     avgwait = sumwait / bursts
     avgtrn = avgburst + avgwait + tcs + (tcs * prmpt / bursts)
     result = [avgburst, avgwait, avgtrn, cts, prmpt]
